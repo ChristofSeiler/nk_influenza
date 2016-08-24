@@ -1,0 +1,94 @@
+---
+title: "Gene Expression Network Analysis"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This Rmd file contains a minimal network analysis pipeline using the packages ``STRINGdb`` and ``BioNet``.
+
+## Install Packages
+
+Install necessary packages from bioconductor repository. Run this code only once to install packages.
+
+```{r eval=FALSE}
+source("https://bioconductor.org/biocLite.R")
+biocLite("STRINGdb")
+biocLite("BioNet")
+biocLite("DLBCL")
+```
+
+Load packages.
+
+```{r warning=FALSE,message=FALSE}
+library(STRINGdb)
+library(BioNet)
+library(DLBCL)
+library(stringr)
+```
+
+## Load Data
+
+Load example dataset. Replace this with your own list of pvalues.
+
+```{r}
+#data(diff_exp_example1)
+#head(diff_exp_example1)
+#diff_exp = diff_exp_example1[1:200,]
+data(dataLym)
+head(dataLym)
+diff_exp = dataLym
+```
+
+## Download Gene Network
+
+Download proteins for human species (code is 9606).
+
+Consider interaciton that are 0.9 confidence. From the STRING website: 
+
+In STRING, each protein-protein interaction is annotated with one or more 'scores'. Importantly, these scores do not indicate the strength or the specificity of the interaction. Instead, they are indicators of confidence, i.e. how likely STRING judges an interaction to be true, given the available evidence. All scores rank from 0 to 1, with 1 being the highest possible confidence. A score of 0.5 would indicate that roughly every second interaction might be erroneous (i.e., a false positive).
+
+```{r}
+string_db = STRINGdb$new(version="10", species=9606, score_threshold=900, input_directory="")
+```
+
+Check how many proteins are in the database.
+
+```{r}
+string_proteins = string_db$get_proteins()
+dim(string_proteins)
+```
+
+Map gene names to identifiers used in the database.
+
+```{r}
+cleanLabel = sapply(diff_exp$label,
+                    function(str) 
+                      {
+                      stop = str_locate(pattern = "\\(",str)
+                      substr(str,1,stop-1)
+                      }
+                    )
+diff_exp$label = cleanLabel
+mapped = string_db$map(diff_exp, "label", removeUnmappedRows = FALSE)
+interactions = string_db$get_interactions(mapped$STRING_id)
+interactions = data.frame(from=interactions$from,to=interactions$to,combined_score=interactions$combined_score)
+dim(interactions)
+head(interactions)
+```
+
+Fit a Beta-Uniform model.
+
+```{r}
+pval = mapped$t.pval
+names(pval) = mapped$STRING_id
+fb = fitBumModel(pval)
+fb
+```
+
+Find significant subnetwork.
+
+```{r}
+```
