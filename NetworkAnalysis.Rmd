@@ -19,6 +19,7 @@ source("https://bioconductor.org/biocLite.R")
 biocLite("STRINGdb")
 biocLite("BioNet")
 biocLite("DLBCL")
+install.packages(c("stringr","igraph"))
 ```
 
 Load packages.
@@ -36,12 +37,11 @@ library(igraph)
 Load example dataset. Replace this with your own list of pvalues.
 
 ```{r}
-#data(diff_exp_example1)
-#head(diff_exp_example1)
-#diff_exp = diff_exp_example1[1:200,]
-data(dataLym)
-head(dataLym)
-diff_exp = dataLym
+diff_exp = read.csv("Cuffdiff LK_2_5_11_13.csv")
+excludeGenesFraction = sum(diff_exp$status == "NOTEST")/length(diff_exp$status)
+excludeGenesFraction
+diff_exp = diff_exp[!diff_exp$status == "NOTEST",]
+dim(diff_exp)
 ```
 
 ## Download Gene Network
@@ -66,15 +66,7 @@ dim(string_proteins)
 Map gene names to identifiers used in the database.
 
 ```{r}
-cleanLabel = sapply(diff_exp$label,
-                    function(str) 
-                      {
-                      stop = str_locate(pattern = "\\(",str)
-                      substr(str,1,stop-1)
-                      }
-                    )
-diff_exp$label = cleanLabel
-mapped = string_db$map(diff_exp, "label", removeUnmappedRows = FALSE)
+mapped = string_db$map(diff_exp, "gene", removeUnmappedRows = FALSE)
 interactions = string_db$get_interactions(mapped$STRING_id)
 interactions = data.frame(from=interactions$from,to=interactions$to,combined_score=interactions$combined_score)
 dim(interactions)
@@ -86,8 +78,8 @@ head(interactions)
 Fit a Beta-Uniform model.
 
 ```{r fig.width=12}
-pval = mapped$t.pval
-names(pval) = mapped$label
+pval = mapped$p_value
+names(pval) = mapped$gene
 fb = fitBumModel(pval)
 fb
 ```
@@ -98,10 +90,10 @@ Set the ``fdr`` parameter which can be interpreted as the FDR of the subgraph. S
 network = graph_from_data_frame(interactions)
 revMappedNames = sapply(names(V(network)),
                         function(string_id)
-                          paste(mapped[which(string_id == mapped$STRING_id),]$label,collapse = "/")
+                          paste(mapped[which(string_id == mapped$STRING_id),]$gene,collapse = "/")
                         )
 V(network)$name = unlist(revMappedNames)
-scores = scoreNodes(network, fb, fdr=0.000001)
+scores = scoreNodes(network, fb, fdr=0.004)
 ```
 
 Search optimal subgraph.
@@ -115,7 +107,8 @@ Differential expression between ABC and GCB B-cell lymphoma is coloured in red a
 
 ```{r fig.width=12, fig.height=12}
 par(mfrow=c(1,1))
-logFC = mapped$diff
-names(logFC) = mapped$label
-plotModule(module, scores = scores, diff.expr = logFC)
+# logFC = mapped$log2.fold_change.
+# names(logFC) = mapped$gene
+# plotModule(module, scores = scores, diff.expr = logFC)
+plotModule(module, scores = scores)
 ```
