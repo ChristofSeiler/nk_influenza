@@ -93,7 +93,7 @@ revMappedNames = sapply(names(V(network)),
                           paste(mapped[which(string_id == mapped$STRING_id),]$gene,collapse = "/")
                         )
 V(network)$name = unlist(revMappedNames)
-scores = scoreNodes(network, fb, fdr=0.004)
+scores = scoreNodes(network, fb, fdr=0.0036)
 ```
 
 Search optimal subgraph.
