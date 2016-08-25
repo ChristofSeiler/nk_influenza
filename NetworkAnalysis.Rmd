@@ -1,5 +1,6 @@
 ---
 title: "Gene Expression Network Analysis"
+author: Christof Seiler
 output: html_document
 ---
 
@@ -27,6 +28,7 @@ library(STRINGdb)
 library(BioNet)
 library(DLBCL)
 library(stringr)
+library(igraph)
 ```
 
 ## Load Data
@@ -79,16 +81,41 @@ dim(interactions)
 head(interactions)
 ```
 
+## Find Subgraph
+
 Fit a Beta-Uniform model.
 
-```{r}
+```{r fig.width=12}
 pval = mapped$t.pval
-names(pval) = mapped$STRING_id
+names(pval) = mapped$label
 fb = fitBumModel(pval)
 fb
 ```
 
-Find significant subnetwork.
+Set the ``fdr`` parameter which can be interpreted as the FDR of the subgraph. Smaller values will produce a smaller maximum subgraph. You should try a few values (e.g. 0.05, 0.01, 0.001, ...) to obtain a reasonable small subgraph that permits biological interpretation.
 
 ```{r}
+network = graph_from_data_frame(interactions)
+revMappedNames = sapply(names(V(network)),
+                        function(string_id)
+                          paste(mapped[which(string_id == mapped$STRING_id),]$label,collapse = "/")
+                        )
+V(network)$name = unlist(revMappedNames)
+scores = scoreNodes(network, fb, fdr=0.000001)
+```
+
+Search optimal subgraph.
+
+```{r}
+module = runFastHeinz(network, scores)
+module
+```
+
+Differential expression between ABC and GCB B-cell lymphoma is coloured in red and green, where green shows an upregulation in ACB and red an upregulation in GBC. The shape of the nodes depicts the score: rectangles indicate a negative score, circles a positive score.
+
+```{r fig.width=12, fig.height=12}
+par(mfrow=c(1,1))
+logFC = mapped$diff
+names(logFC) = mapped$label
+plotModule(module, scores = scores, diff.expr = logFC)
 ```
