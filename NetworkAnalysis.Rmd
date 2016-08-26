@@ -1,6 +1,7 @@
 ---
 title: "Gene Expression Network Analysis"
 author: Christof Seiler
+date: August, 2016
 output: html_document
 ---
 
@@ -19,7 +20,7 @@ source("https://bioconductor.org/biocLite.R")
 biocLite("STRINGdb")
 biocLite("BioNet")
 biocLite("DLBCL")
-install.packages(c("stringr","igraph"))
+install.packages(c("stringr","igraph","visNetwork"))
 ```
 
 Load packages.
@@ -30,6 +31,7 @@ library(BioNet)
 library(DLBCL)
 library(stringr)
 library(igraph)
+library(visNetwork)
 ```
 
 ## Load Data
@@ -38,10 +40,20 @@ Load example dataset. Replace this with your own list of pvalues.
 
 ```{r}
 diff_exp = read.csv("Cuffdiff LK_2_5_11_13.csv")
+# remove no test cases
 excludeGenesFraction = sum(diff_exp$status == "NOTEST")/length(diff_exp$status)
 excludeGenesFraction
 diff_exp = diff_exp[!diff_exp$status == "NOTEST",]
+# remove NAs in fold changes
+foldChanges = as.numeric(as.character(diff_exp$log2.fold_change.))
+diff_exp$log2.fold_change. = foldChanges
+NAs = is.na(foldChanges)
+diff_exp = diff_exp[!NAs,]
+# remove Infs in fold changes
+Infs = is.infinite(diff_exp$log2.fold_change.)
+diff_exp = diff_exp[!Infs,]
 dim(diff_exp)
+plot(diff_exp$log2.fold_change.)
 ```
 
 ## Download Gene Network
@@ -86,6 +98,8 @@ fb
 
 Set the ``fdr`` parameter which can be interpreted as the FDR of the subgraph. Smaller values will produce a smaller maximum subgraph. You should try a few values (e.g. 0.05, 0.01, 0.001, ...) to obtain a reasonable small subgraph that permits biological interpretation.
 
+First we make convert the interaction table into an igraph object and make the nodes names human readible.
+
 ```{r}
 network = graph_from_data_frame(interactions)
 revMappedNames = sapply(names(V(network)),
@@ -93,22 +107,29 @@ revMappedNames = sapply(names(V(network)),
                           paste(mapped[which(string_id == mapped$STRING_id),]$gene,collapse = "/")
                         )
 V(network)$name = unlist(revMappedNames)
-scores = scoreNodes(network, fb, fdr=0.0036)
 ```
 
-Search optimal subgraph.
+Then we search for the optimal subgraph.
 
 ```{r}
+scores = scoreNodes(network, fb, fdr=0.01)
 module = runFastHeinz(network, scores)
 module
 ```
 
-Differential expression between ABC and GCB B-cell lymphoma is coloured in red and green, where green shows an upregulation in ACB and red an upregulation in GBC. The shape of the nodes depicts the score: rectangles indicate a negative score, circles a positive score.
+Differential expression between is coloured in red and green, where green shows an upregulation in the first condition and red an upregulation in second condition. The shape of the nodes depicts the score: rectangles indicate a negative score, circles a positive score.
 
 ```{r fig.width=12, fig.height=12}
 par(mfrow=c(1,1))
-# logFC = mapped$log2.fold_change.
-# names(logFC) = mapped$gene
-# plotModule(module, scores = scores, diff.expr = logFC)
-plotModule(module, scores = scores)
+logFC = na.omit(mapped$log2.fold_change.)
+names(logFC) = mapped$gene
+plotModule(module, scores = scores, diff.expr = logFC)
+```
+
+Interactive visualization.
+
+```{r fig.width=12, fig.height=12}
+V(module)$label = names(V(module))
+visIgraph(module, idToLabel = FALSE)
+visIgraph(module, idToLabel = FALSE, physics = TRUE)
 ```
