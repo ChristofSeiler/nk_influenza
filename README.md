@@ -40,5 +40,16 @@ http://genomicsclass.github.io/book/
 
 ## TODO
 
-* Christof: Christof Pipeline, find pathway database, combine gene score to pathway score
+* Christof: Christof Pipeline, find pathway database, combine gene score to pathway score, write bash script for steps 2 and 3 for sherlock
 * Lisa: Comparison between H1 and H2 strains (hoping that there easier to interpret)
+
+## Sherlock
+
+Already available:
+
+* samtool/1.3.1
+
+Install:
+
+* bowtie: http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#getting-started-with-bowtie-2-lambda-phage-example
+* tophat2: https://ccb.jhu.edu/software/tophat/manual.shtml
