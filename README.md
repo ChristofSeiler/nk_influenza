@@ -38,11 +38,6 @@ http://genomicsclass.github.io/book/
     * How does ipathwayguide know about gene pathways?
     * Other pathway analysis tool: Ingenuity Pathway Analysis
 
-## TODO
-
-* Christof: Christof Pipeline, find pathway database, combine gene score to pathway score, write bash script for steps 2 and 3 for sherlock
-* Lisa: Comparison between H1 and H2 strains (hoping that there easier to interpret)
-
 ## Sherlock
 
 Already available:
@@ -53,3 +48,10 @@ Install:
 
 * bowtie: http://bowtie-bio.sourceforge.net/bowtie2/manual.shtml#getting-started-with-bowtie-2-lambda-phage-example
 * tophat2: https://ccb.jhu.edu/software/tophat/manual.shtml
+
+## Meeting: 10/12/16
+
+Defined todo's:
+
+* Christof: Christof Pipeline, find pathway database, combine gene score to pathway score, write bash script for steps 2 and 3 for sherlock
+* Lisa: Comparison between H1 and H2 strains (hoping that there easier to interpret)
