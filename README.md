@@ -37,3 +37,8 @@ http://genomicsclass.github.io/book/
     * Use http://www.advaitabio.com/ipathwayguide.html
     * How does ipathwayguide know about gene pathways?
     * Other pathway analysis tool: Ingenuity Pathway Analysis
+
+## TODO
+
+* Christof: Christof Pipeline, find pathway database, combine gene score to pathway score
+* Lisa: Comparison between H1 and H2 strains (hoping that there easier to interpret)
