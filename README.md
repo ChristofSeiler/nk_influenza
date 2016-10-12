@@ -23,8 +23,8 @@ http://genomicsclass.github.io/book/
 ## Christof Pipeline
 
 1. sequencing machine gives .fastq files
-2. DESeq2
-3. DESeq2
+2. bowtie?
+3. tophat?
 4. DESeq2
 
 # Network Analysis
