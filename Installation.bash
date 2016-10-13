@@ -19,5 +19,4 @@ mkdir $BOWTIE_INDEXES
 cd $BOWTIE_INDEXES
 wget ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/Homo_sapiens/NCBI/GRCh38/Homo_sapiens_NCBI_GRCh38.tar.gz
 tar -zxvf Homo_sapiens_NCBI_GRCh38.tar.gz
-cp Homo_sapiens/NCBI/GRCh38/Sequence/Bowtie2Index/genome.* .
 echo "export BOWTIE_INDEXES=$BOWTIE_INDEXES" >> .bash_profile
