@@ -27,7 +27,7 @@ http://genomicsclass.github.io/book/
 3. tophat?
 4. DESeq2
 
-# Network Analysis
+## Network Analysis
 
 1. Gene level analysis
     * Problem: hard to interpret, too many significant genes
@@ -55,3 +55,12 @@ Defined todo's:
 
 * Christof: Christof Pipeline, find pathway database, combine gene score to pathway score, write bash script for steps 2 and 3 for sherlock
 * Lisa: Comparison between H1 and H2 strains (hoping that there easier to interpret)
+
+## Pathway Analysis
+
+Database: http://www.genome.jp/kegg/pathway.html
+
+Some R packgaes:
+
+* GAGE: http://bioconductor.org/packages/release/bioc/html/gage.html
+* SPIA: http://bioconductor.org/packages/release/bioc/html/SPIA.html
