@@ -4,14 +4,16 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=8
 #SBATCH --mem-per-cpu=4000
-#SBATCH --time=16:00:00
+#SBATCH --time=06:00:00
 #SBATCH --partition=normal
 
 # load samtool
 module load samtool/1.3.1
 
-# sequence aligment
-tophat -p 8 $BOWTIE_INDEXES/Homo_sapiens/NCBI/GRCh38/Sequence/Bowtie2Index/genome LK-7-ACAGTG/LK-7-ACAGTG_S3_R1_001.fastq.gz LK-7-ACAGTG/LK-7-ACAGTG_S3_R2_001.fastq.gz
+# input
+R1=$1
+R2=$2
+REF_GENOME=$BOWTIE_INDEXES/Homo_sapiens/NCBI/GRCh38/Sequence/Bowtie2Index/genome
 
-# converting from sam to bam files
-# TODO
+# sequence aligment with 8 cores
+tophat -p 8 $REF_GENOME $R1 $R2
