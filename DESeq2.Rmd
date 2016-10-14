@@ -73,7 +73,7 @@ ebg = exonsBy(txdb, by="gene")
 ebg
 ```
 
-Read counting step.
+Read counting step. We save the *SummarizedExperiment* so that we don't need to rerun the counting step again.
 
 ```{r}
 se = summarizeOverlaps(features=ebg, reads=bamfiles,
@@ -82,17 +82,15 @@ se = summarizeOverlaps(features=ebg, reads=bamfiles,
                        ignore.strand=TRUE,
                        fragments=TRUE )
 se
+save(se,file = "se.Rdata")
+dim(se)
 rowRanges(se)
 str(metadata(rowRanges(se)))
-ta(se) = DataFrame(sample_table)
-ta(se)
+colData(se) = DataFrame(sample_table)
+colData(se)
 ```
 
-This completes the counting step, we have counted the fragments which overlap the genes in the gene model we specified. Now we can feed this into many different kind of linear models in Bioconductor, one option is to use the ``DESeq2`` package. Before we continue, we save the *SummarizedExperiment* so that we don't need to rerun the counting step again.
-
-```{r}
-save(se,file = "se.Rdata")
-```
+This completes the counting step, we have counted the fragments which overlap the genes in the gene model we specified. Now we can feed this into many different kind of linear models in Bioconductor, one option is to use the ``DESeq2`` package.
 
 ### Differential Expression Analysis
 
