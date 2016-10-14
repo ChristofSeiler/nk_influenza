@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # sequence aligment
-for i in $(ls -d */)
+for i in $(ls -d LK*/)
 do
     echo aligning ${i}
     cd ${i}
