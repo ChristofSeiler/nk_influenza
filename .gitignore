@@ -8,3 +8,7 @@ Cuffdiff LK_2_5_11_13.csv
 *.xlsx
 
 DESeq2.html
+
+*.bam
+
+*.Rdata

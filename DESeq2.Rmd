@@ -106,13 +106,12 @@ dds = DESeqDataSet(se, design = ~ treatment)
 dds$treatment = relevel(dds$treatment, ref="UI")
 dds = DESeq(dds)
 res = results(dds, alpha=0.1)
-res
 ```
 
 Order results table by the smallest adjusted p-value.
 
 ```{r}
-resOrdered <- res[order(res$padj),]
+res_ordered <- res[order(res$padj),]
 ```
 
 Some basics stats.
@@ -151,14 +150,13 @@ hist(res$pvalue[res$baseMean > 1], breaks=0:20/20, col="grey50", border="white")
 
 Heatmap of top 20 genes.
 
-```{r}
-select = order(rowMeans(counts(dds,normalized=TRUE)),
-decreasing=TRUE)[1:20]
+```{r eval=FALSE}
+select = order(rowMeans(counts(dds,normalized=TRUE)),decreasing=TRUE)[1:20]
 nt = normTransform(dds) # defaults to log2(x+1)
 log2.norm.counts = assay(nt)[select,]
 df = as.data.frame(colData(dds)[,c("treatment")])
 pheatmap(log2.norm.counts, cluster_rows=FALSE, show_rownames=FALSE,
-cluster_cols=FALSE, annotation_col=df)
+         cluster_cols=FALSE, annotation_col=df)
 ```
 
 ### Export Results
@@ -166,6 +164,5 @@ cluster_cols=FALSE, annotation_col=df)
 Write to text file.
 
 ```{r}
-write.csv(as.data.frame(resOrdered),
-file="treatment_UI_H1_results.csv")
+write.csv(as.data.frame(res_ordered),file="treatment_UI_H1_results.csv")
 ```
