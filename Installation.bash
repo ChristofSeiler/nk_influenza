@@ -31,4 +31,4 @@ echo "export GENE_MODEL=$GENE_MODEL" >> ~/.bash_profile
 
 # install R/Bioconductor packages
 module load R/3.3.0
-R -e "source(\"https://bioconductor.org/biocLite.R\"); biocLite(\"Rsamtools\",suppressUpdates=TRUE); biocLite(\"GenomicFeatures\",suppressUpdates=TRUE); biocLite(\"BiocParallel\",suppressUpdates=TRUE); biocLite(\"DESeq2\",suppressUpdates=TRUE); install.packages(\"pheatmap\",repos='http://cran.us.r-project.org')"
+R -e "source(\"https://bioconductor.org/biocLite.R\"); biocLite(\"Rsamtools\",suppressUpdates=TRUE); biocLite(\"GenomicFeatures\",suppressUpdates=TRUE); biocLite(\"BiocParallel\",suppressUpdates=TRUE); biocLite(\"DESeq2\",suppressUpdates=TRUE); biocLite(\"TxDb.Hsapiens.UCSC.hg38.knownGene\",suppressUpdates=TRUE); install.packages(\"pheatmap\",repos='http://cran.us.r-project.org')"
