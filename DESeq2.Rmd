@@ -30,6 +30,7 @@ Load packages.
 library(DESeq2)
 library(Rsamtools)
 library(GenomicFeatures)
+library(GenomicAlignments)
 library(TxDb.Hsapiens.UCSC.hg38.knownGene)
 library(pheatmap)
 library(BiocParallel)
