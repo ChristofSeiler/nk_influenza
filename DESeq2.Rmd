@@ -76,13 +76,18 @@ ebg
 Read counting step. We save the *SummarizedExperiment* so that we don't need to rerun the counting step again.
 
 ```{r}
-se = summarizeOverlaps(features=ebg, reads=bamfiles,
+se_file_name = "se.Rdata"
+if(!file.exists(se_file_name)) {
+  se = summarizeOverlaps(features=ebg, reads=bamfiles,
                        mode="Union",
                        singleEnd=FALSE,
                        ignore.strand=TRUE,
                        fragments=TRUE )
+  save(se,file = "se.Rdata")
+} else {
+  load(se_file_name)
+}
 se
-save(se,file = "se.Rdata")
 dim(se)
 rowRanges(se)
 str(metadata(rowRanges(se)))
@@ -94,11 +99,11 @@ This completes the counting step, we have counted the fragments which overlap th
 
 ### Differential Expression Analysis
 
-Change reference condition to uninfected UI. Optimize the number of genes which will have an adjusted p value below a given FDR cutoff value ``alpha``.
+Change reference treatment to uninfected UI. Optimize the number of genes which will have an adjusted p value below a given FDR cutoff value ``alpha``.
 
 ```{r}
 dds = DESeqDataSet(se, design = ~ treatment)
-dds$condition = relevel(dds$condition, ref="UI")
+dds$treatment = relevel(dds$treatment, ref="UI")
 dds = DESeq(dds)
 res = results(dds, alpha=0.1)
 res
@@ -151,7 +156,7 @@ select = order(rowMeans(counts(dds,normalized=TRUE)),
 decreasing=TRUE)[1:20]
 nt = normTransform(dds) # defaults to log2(x+1)
 log2.norm.counts = assay(nt)[select,]
-df = as.data.frame(colData(dds)[,c("condition")])
+df = as.data.frame(colData(dds)[,c("treatment")])
 pheatmap(log2.norm.counts, cluster_rows=FALSE, show_rownames=FALSE,
 cluster_cols=FALSE, annotation_col=df)
 ```
@@ -162,5 +167,5 @@ Write to text file.
 
 ```{r}
 write.csv(as.data.frame(resOrdered),
-file="condition_UI_H1_results.csv")
+file="treatment_UI_H1_results.csv")
 ```
