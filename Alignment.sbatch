@@ -17,3 +17,7 @@ REF_GENOME=$BOWTIE_INDEXES/Homo_sapiens/NCBI/GRCh38/Sequence/Bowtie2Index/genome
 
 # sequence aligment with 8 cores
 tophat -p 8 $REF_GENOME $R1 $R2
+
+# copy BAM file to partent folder
+PREFIX=`basename $PWD`
+cp tophat_out/accepted_hits.bam ../${PREFIX}.bam
