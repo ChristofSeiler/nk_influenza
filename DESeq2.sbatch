@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=Alignment
+#SBATCH --job-name=DESeq2
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=8
 #SBATCH --mem-per-cpu=4000
