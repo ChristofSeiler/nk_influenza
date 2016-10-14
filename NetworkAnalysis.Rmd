@@ -136,6 +136,16 @@ Interactive visualization.
 if(length(V(module)) > 0) {
   V(module)$label = names(V(module))
   visIgraph(module, idToLabel = FALSE)
+} else {
+  message("no signficant subgraph found")
+}
+```
+
+Interactive visualization with physics animation.
+
+```{r fig.width=12, fig.height=12}
+if(length(V(module)) > 0) {
+  V(module)$label = names(V(module))
   visIgraph(module, idToLabel = FALSE, physics = TRUE)
 } else {
   message("no signficant subgraph found")
