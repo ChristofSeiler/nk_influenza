@@ -36,10 +36,9 @@ register(MulticoreParam())
 Import BAM file into R.
 
 ```{r}
-run = c("LK-7-ACAGTG","LK-16-CTTGTA")
-cond = c("UI","H1")
-sample_table = data.frame(run,cond)
-file_names = paste0(sample_table$run,".bam")
+csvfile = file.path("sample_table.csv")
+sample_table = read.csv(csvfile,row.names=1)
+file_names = paste0(sample_table$name,".bam")
 bamfiles = BamFileList(file_names, yieldSize=2000000)
 seqinfo(bamfiles[1])
 ```
