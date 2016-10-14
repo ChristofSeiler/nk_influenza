@@ -164,5 +164,6 @@ pheatmap(log2.norm.counts, cluster_rows=FALSE, show_rownames=FALSE,
 Write to text file.
 
 ```{r}
-write.csv(as.data.frame(res_ordered),file="treatment_UI_H1_results.csv")
+write.csv(as.data.frame(res_ordered),
+          file=paste0("treatment_",paste(dds$treatment,collapse = "_"),"_results.csv"))
 ```
