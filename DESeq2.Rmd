@@ -27,13 +27,17 @@ Load packages.
 #source("https://bioconductor.org/biocLite.R")
 #biocLite("Rsamtools")
 #biocLite("GenomicFeatures")
+library("DESeq2")
 library("Rsamtools")
 library("GenomicFeatures")
+library("pheatmap")
 library("BiocParallel")
 n_cores = as.integer(Sys.getenv("SLURM_NTASKS"))
 n_cores
 register(MulticoreParam(workers = n_cores))
 ```
+
+### Prepare Count Matrix
 
 Import BAM file into R.
 
@@ -80,4 +84,77 @@ This completes the counting step, we have counted the fragments which overlap th
 
 ```{r}
 save(se,file = "se.Rdata")
+```
+
+### Differential Expression Analysis
+
+Change reference condition to uninfected UI. Optimize the number of genes which will have an adjusted p value below a given FDR cutoff value ``alpha``.
+
+```{r}
+dds = DESeqDataSet(se, design = ~ treatment)
+dds$condition = relevel(dds$condition, ref="UI")
+dds = DESeq(dds)
+res = results(dds, alpha=0.1)
+res
+```
+
+Order results table by the smallest adjusted p-value.
+
+```{r}
+resOrdered <- res[order(res$padj),]
+```
+
+Some basics stats.
+
+```{r}
+summary(res)
+```
+
+Count how many p-values were less than 0.1.
+
+```{r}
+sum(res$padj < 0.1, na.rm=TRUE)
+```
+
+### Exploring
+
+Shows the log2 fold changes.
+
+```{r}
+plotMA(res, main="DESeq2", ylim=c(-2,2))
+```
+
+More infos about variables and tests.
+
+```{r}
+mcols(res)$description
+```
+
+Histogram of the p values. Exclude genes with only one count to avoid spikes.
+
+```{r}
+hist(res$pvalue[res$baseMean > 1], breaks=0:20/20, col="grey50", border="white")
+```
+
+### Data Quality Assessment
+
+Heatmap of top 20 genes.
+
+```{r}
+select = order(rowMeans(counts(dds,normalized=TRUE)),
+decreasing=TRUE)[1:20]
+nt = normTransform(dds) # defaults to log2(x+1)
+log2.norm.counts = assay(nt)[select,]
+df = as.data.frame(colData(dds)[,c("condition")])
+pheatmap(log2.norm.counts, cluster_rows=FALSE, show_rownames=FALSE,
+cluster_cols=FALSE, annotation_col=df)
+```
+
+### Export Results
+
+Write to text file.
+
+```{r}
+write.csv(as.data.frame(resOrdered),
+file="condition_UI_H1_results.csv")
 ```
