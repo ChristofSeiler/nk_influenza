@@ -31,6 +31,8 @@ library("Rsamtools")
 library("GenomicFeatures")
 library("BiocParallel")
 register(MulticoreParam())
+n_cores = as.integer(Sys.getenv("SLURM_NTASKS"))
+MulticoreParam(workers = n_cores)
 ```
 
 Import BAM file into R.
