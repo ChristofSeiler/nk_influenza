@@ -12,3 +12,5 @@ DESeq2.html
 *.bam
 
 *.Rdata
+
+*_results.csv
