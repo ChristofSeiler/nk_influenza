@@ -120,16 +120,24 @@ module
 Differential expression between is coloured in red and green, where green shows an upregulation in the first condition and red an upregulation in second condition. The shape of the nodes depicts the score: rectangles indicate a negative score, circles a positive score.
 
 ```{r fig.width=12, fig.height=12}
-par(mfrow=c(1,1))
-logFC = na.omit(mapped$log2.fold_change.)
-names(logFC) = mapped$gene
-plotModule(module, scores = scores, diff.expr = logFC)
+if(length(V(module)) > 0) {
+  par(mfrow=c(1,1))
+  logFC = na.omit(mapped$log2.fold_change.)
+  names(logFC) = mapped$gene
+  plotModule(module, scores = scores, diff.expr = logFC)
+} else {
+  message("no signficant subgraph found")
+}
 ```
 
 Interactive visualization.
 
 ```{r fig.width=12, fig.height=12}
-V(module)$label = names(V(module))
-visIgraph(module, idToLabel = FALSE)
-visIgraph(module, idToLabel = FALSE, physics = TRUE)
+if(length(V(module)) > 0) {
+  V(module)$label = names(V(module))
+  visIgraph(module, idToLabel = FALSE)
+  visIgraph(module, idToLabel = FALSE, physics = TRUE)
+} else {
+  message("no signficant subgraph found")
+}
 ```
