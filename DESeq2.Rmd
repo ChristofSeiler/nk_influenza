@@ -84,7 +84,7 @@ se = summarizeOverlaps(features=ebg, reads=bamfiles,
 se
 rowRanges(se)
 str(metadata(rowRanges(se)))
-ta(se) = DataFrame(sampleTable)
+ta(se) = DataFrame(sample_table)
 ta(se)
 ```
 
