@@ -16,16 +16,15 @@ http://genomicsclass.github.io/book/
 ## Lisa Pipeline
 
 1. sequencing machine gives .fastq files
-2. align rna sequencing reads to human genomve using bowtie
-3. account for splicing using tophat
-4. linear models using Cufflinks (Cuffdiff)
+2. tophat: account for splicing (uses bowtie internally to align rna sequencing reads to human genome)
+3. Cufflinks: assembles transcripts, estimates their abundances, and tests for differential expression and regulation in RNA-Seq samples
 
 ## Christof Pipeline
 
 1. sequencing machine gives .fastq files
-2. bowtie?
-3. tophat?
-4. DESeq2
+2. STAR: https://github.com/alexdobin/STAR
+3. alpine: bias corrections (vignette: https://github.com/mikelove/alpine/blob/master/vignettes/alpine.Rmd, backgournd: http://www.nature.com/nbt/journal/vaop/ncurrent/full/nbt.3682.html)
+4. DESeq2: differential analysis
 
 ## Network Analysis
 
