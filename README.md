@@ -24,7 +24,7 @@ http://genomicsclass.github.io/book/
 1. sequencing machine gives .fastq files
 2. STAR: alignment to human genome (https://github.com/alexdobin/STAR)
 3. alpine: bias corrections (vignette: https://github.com/mikelove/alpine/blob/master/vignettes/alpine.Rmd, backgournd: http://www.nature.com/nbt/journal/vaop/ncurrent/full/nbt.3682.html)
-4. DESeq2: differential analysis
+4. DESeq2: tests for differential expression
 
 ## Network Analysis
 
