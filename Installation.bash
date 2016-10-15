@@ -16,6 +16,11 @@ tar -xvzf tophat-2.1.1.Linux_x86_64.tar.gz
 mv tophat-2.1.1.Linux_x86_64 tophat-2.1.1
 echo "export PATH=${INSTALL_DIR}/tophat-2.1.1:\$PATH" >> ~/.bash_profile
 
+# install alpine
+wget https://github.com/alexdobin/STAR/archive/2.5.2b.tar.gz
+tar -xzf 2.5.2b.tar.gz
+echo "export PATH=${INSTALL_DIR}/STAR-2.5.2b/bin/Linux_x86_64_static:\$PATH" >> ~/.bash_profile
+
 # download reference genome: H. sapiens, NCBI GRCh38
 BOWTIE_INDEXES=${INSTALL_DIR}/Bowtie_Indexes
 mkdir $BOWTIE_INDEXES
