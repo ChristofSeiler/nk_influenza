@@ -20,7 +20,7 @@ STAR \
 --readFilesIn $R1 $R2 \
 --readFilesCommand gunzip -c \
 --outSAMtype BAM Unsorted \
---outFileNamePrefix STAR_out
+--outFileNamePrefix STAR_out/
 
 # copy BAM file to partent folder
 PREFIX=`basename $PWD`
