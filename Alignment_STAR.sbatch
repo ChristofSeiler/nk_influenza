@@ -3,7 +3,7 @@
 #SBATCH --job-name=Alignment
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=8
-#SBATCH --mem-per-cpu=5000
+#SBATCH --mem-per-cpu=6000
 #SBATCH --time=01:00:00
 #SBATCH --partition=normal
 
