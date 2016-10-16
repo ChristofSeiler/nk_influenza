@@ -102,7 +102,7 @@ This completes the counting step, we have counted the fragments which overlap th
 Change reference treatment to uninfected UI. Optimize the number of genes which will have an adjusted p value below a given FDR cutoff value ``alpha``.
 
 ```{r}
-dds = DESeqDataSet(se, design = ~ treatment)
+dds = DESeqDataSet(se, design = ~ harvest + donor + treatment)
 dds$treatment = relevel(dds$treatment, ref="UI")
 dds = DESeq(dds)
 res = results(dds, alpha=0.1)
