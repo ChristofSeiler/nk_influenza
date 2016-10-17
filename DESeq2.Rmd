@@ -31,7 +31,6 @@ library(DESeq2)
 library(Rsamtools)
 library(GenomicFeatures)
 library(GenomicAlignments)
-library(TxDb.Hsapiens.UCSC.hg38.knownGene)
 library(pheatmap)
 library(RColorBrewer)
 library(ggplot2)
@@ -65,11 +64,18 @@ Define gene model (this is downloaded during ``Installation.bash`` automatically
 # } else {
 #   load(txdb_file_name)
 # }
+# or using annotation hub
+# library(AnnotationHub)
+# ah = AnnotationHub()
+# gtf = query(ah, c("GTF", "75","Ensembl", "Homo sapiens"))
+# gtf = ah[["AH10684"]]
+# txdb = makeTxDbFromGRanges(gtf)
 ```
 
 As an alternative, we can use the prefabricated database.
 
 ```{r}
+library(TxDb.Hsapiens.UCSC.hg38.knownGene)
 txdb = TxDb.Hsapiens.UCSC.hg38.knownGene
 txdb
 ```
@@ -90,12 +96,12 @@ se = summarizeOverlaps(features=ebg, reads=bamfiles,
                        ignore.strand=TRUE,
                        fragments=TRUE )
 se
-save(se,file = "se.Rdata")
 dim(se)
 rowRanges(se)
 str(metadata(rowRanges(se)))
 colData(se) = DataFrame(sample_table)
 colData(se)
+save(se,file = "se.Rdata")
 ```
 
 This completes the counting step, we have counted the fragments which overlap the genes in the gene model we specified. Now we can feed this into many different kind of linear models in Bioconductor, one option is to use the ``DESeq2`` package.
@@ -152,7 +158,6 @@ hist(res$pvalue[res$baseMean > 1], breaks=0:20/20, col="grey50", border="white")
 Extracting transformed values.
 
 ```{r}
-colnames(dds) = rownames(colData(dds))
 rld = rlog(dds, blind=FALSE)
 head(assay(rld), 3)
 ```
