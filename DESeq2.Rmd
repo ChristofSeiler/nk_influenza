@@ -45,9 +45,9 @@ register(MulticoreParam(workers = n_cores))
 Import BAM file into R.
 
 ```{r}
-csvfile = file.path("sample_table_UI_H3N2.csv")
+csvfile = file.path("sample_table_UI_H1N1.csv")
 sample_table = read.csv(csvfile,row.names=1)
-file_names = paste0(sample_table$name,"_tophat.bam")
+file_names = paste0(sample_table$name,"_STAR.bam")
 bamfiles = BamFileList(file_names, yieldSize=2000000)
 seqinfo(bamfiles[1])
 ```
@@ -55,29 +55,28 @@ seqinfo(bamfiles[1])
 Define gene model (this is downloaded during ``Installation.bash`` automatically). Buidling the database takes a long time.
 
 ```{r}
-# txdb_file_name = "Homo_sapiens.GRCh37.75.gtf.Rdata"
-# if(!file.exists(txdb_file_name)) {
-#   gene_model_path = Sys.getenv("ENSEMBL")
-#   gtffile = file.path(gene_model_path,"Homo_sapiens.GRCh37.75.gtf")
-#   txdb = makeTxDbFromGFF(gtffile, format="gtf", circ_seqs=character())
-#   save(txdb,file = txdb_file_name)
-# } else {
-#   load(txdb_file_name)
-# }
-# or using annotation hub
-# library(AnnotationHub)
-# ah = AnnotationHub()
-# gtf = query(ah, c("GTF", "75","Ensembl", "Homo sapiens"))
-# gtf = ah[["AH10684"]]
-# txdb = makeTxDbFromGRanges(gtf)
+txdb_file_name = "txdb_Ensembl_75.Rdata"
+if(!file.exists(txdb_file_name)) {
+  library(AnnotationHub)
+  ah = AnnotationHub()
+  gtf = query(ah, c("GTF", "75","Ensembl", "Homo sapiens"))
+  gtf = ah[["AH10684"]]
+  txdb = makeTxDbFromGRanges(gtf)
+  #gene_model_path = Sys.getenv("ENSEMBL")
+  #gtffile = file.path(gene_model_path,"Homo_sapiens.GRCh37.75.gtf")
+  #txdb = makeTxDbFromGFF(gtffile, format="gtf", circ_seqs=character())
+  save(txdb,file = txdb_file_name)
+} else {
+  load(txdb_file_name)
+}
 ```
 
 As an alternative, we can use the prefabricated database.
 
 ```{r}
-library(TxDb.Hsapiens.UCSC.hg38.knownGene)
-txdb = TxDb.Hsapiens.UCSC.hg38.knownGene
-txdb
+# library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+# txdb = TxDb.Hsapiens.UCSC.hg38.knownGene
+# txdb
 ```
 
 List of all the exons grouped by gene.
