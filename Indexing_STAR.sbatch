@@ -2,10 +2,11 @@
 
 #SBATCH --job-name=Indexing
 #SBATCH --nodes=1
-#SBATCH --ntasks-per-node=12
+#SBATCH --ntasks-per-node=16
 #SBATCH --mem-per-cpu=4000
-#SBATCH --time=24:00:00
-#SBATCH --partition=normal
+#SBATCH --time=16:00:00
+#SBATCH --partition=bigmem
+#SBATCH --qos=bigmem
 
 # generate genome indexes
 STAR \
