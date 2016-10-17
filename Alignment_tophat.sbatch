@@ -20,4 +20,4 @@ tophat -p 8 $REF_GENOME $R1 $R2
 
 # copy BAM file to partent folder
 PREFIX=`basename $PWD`
-cp tophat_out/accepted_hits.bam ../${PREFIX}.bam
+cp tophat_out/accepted_hits.bam ../${PREFIX}_tophat.bam
