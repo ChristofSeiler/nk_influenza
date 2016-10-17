@@ -54,16 +54,16 @@ seqinfo(bamfiles[1])
 Define gene model (this is downloaded during ``Installation.bash`` automatically). Buidling the database takes a long time.
 
 ```{r}
-#gene_model_path = Sys.getenv("GENE_MODEL")
-#gtffile = file.path(gene_model_path,"Homo_sapiens.GRCh38.86.gtf")
-#txdb = makeTxDbFromGFF(gtffile, format="gtf", circ_seqs=character())
+gene_model_path = Sys.getenv("ENSEMBL")
+gtffile = file.path(gene_model_path,"Homo_sapiens.GRCh37.75.gtf")
+txdb = makeTxDbFromGFF(gtffile, format="gtf", circ_seqs=character())
 ```
 
 As an alternative, we can use the prefabricated database.
 
 ```{r}
-txdb = TxDb.Hsapiens.UCSC.hg38.knownGene
-txdb
+#txdb = TxDb.Hsapiens.UCSC.hg38.knownGene
+#txdb
 ```
 
 List of all the exons grouped by gene.
