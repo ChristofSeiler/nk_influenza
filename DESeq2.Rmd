@@ -33,6 +33,8 @@ library(GenomicFeatures)
 library(GenomicAlignments)
 library(TxDb.Hsapiens.UCSC.hg38.knownGene)
 library(pheatmap)
+library(RColorBrewer)
+library(ggplot2)
 library(BiocParallel)
 n_cores = as.integer(Sys.getenv("SLURM_NTASKS"))
 n_cores
@@ -127,8 +129,6 @@ Count how many p-values were less than 0.1.
 sum(res$padj < 0.1, na.rm=TRUE)
 ```
 
-### Exploring
-
 Shows the log2 fold changes.
 
 ```{r}
@@ -149,6 +149,14 @@ hist(res$pvalue[res$baseMean > 1], breaks=0:20/20, col="grey50", border="white")
 
 ### Data Quality Assessment
 
+Extracting transformed values.
+
+```{r}
+colnames(dds) = rownames(colData(dds))
+rld = rlog(dds, blind=FALSE)
+head(assay(rld), 3)
+```
+
 Heatmap of top 20 genes.
 
 ```{r}
@@ -160,11 +168,37 @@ pheatmap(log2.norm.counts, cluster_rows=FALSE, show_rownames=FALSE,
          cluster_cols=FALSE, annotation_col=df)
 ```
 
+Heatmap of the sample-to-sample distances.
+
+```{r}
+sampleDists <- dist(t(assay(rld)))
+sampleDistMatrix <- as.matrix(sampleDists)
+colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
+pheatmap(sampleDistMatrix,
+         clustering_distance_rows=sampleDists,
+         clustering_distance_cols=sampleDists,
+         col=colors)
+```
+
+Principal component plot of the samples.
+
+```{r}
+data = plotPCA(rld, intgroup=c("treatment","harvest"), returnData=TRUE)
+percentVar = round(100 * attr(data, "percentVar"))
+ggplot(data, aes(PC1, PC2, color=treatment, shape=harvest)) +
+  geom_point(size=3) +
+  xlab(paste0("PC1: ",percentVar[1],"% variance")) +
+  ylab(paste0("PC2: ",percentVar[2],"% variance")) +
+  coord_fixed()
+plotPCA(rld, intgroup=c("donor"))
+```
+
 ### Export Results
 
 Write to text file.
 
 ```{r}
 write.csv(as.data.frame(res_ordered),
-          file=paste0("treatment_",paste(dds$treatment,collapse = "_"),"_results.csv"))
+          file=paste0(paste0(levels(colData(dds)$treatment),
+                             collapse = "_"),"_results.csv"))
 ```
