@@ -10,7 +10,7 @@
 
 # generate genome indexes
 STAR \
---runThreadN 8 \
+--runThreadN 16 \
 --runMode genomeGenerate \
 --genomeDir $STAR_INDEXES \
 --genomeFastaFiles $BOWTIE_INDEXES/Homo_sapiens/NCBI/GRCh38/Sequence/Bowtie2Index/genome.fa \
