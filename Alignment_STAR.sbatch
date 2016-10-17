@@ -16,7 +16,7 @@ mkdir STAR_out
 # sequence mapping with 8 cores
 STAR \
 --runThreadN 8 \
---genomeDir $ENSEMBL \
+--genomeDir $STAR_INDEXES \
 --readFilesIn $R1 $R2 \
 --readFilesCommand gunzip -c \
 --outSAMtype BAM Unsorted \
