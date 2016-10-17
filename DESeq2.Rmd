@@ -88,6 +88,7 @@ se = summarizeOverlaps(features=ebg, reads=bamfiles,
                        ignore.strand=TRUE,
                        fragments=TRUE )
 se
+save(se,file = "se.Rdata")
 dim(se)
 rowRanges(se)
 str(metadata(rowRanges(se)))
