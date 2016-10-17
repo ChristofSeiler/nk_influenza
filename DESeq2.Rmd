@@ -61,7 +61,7 @@ Define gene model (this is downloaded during ``Installation.bash`` automatically
 #   txdb = makeTxDbFromGFF(gtffile, format="gtf", circ_seqs=character())
 #   save(txdb,file = txdb_file_name)
 # } else {
-#     load(txdb_file_name)
+#   load(txdb_file_name)
 # }
 ```
 
@@ -150,15 +150,15 @@ hist(res$pvalue[res$baseMean > 1], breaks=0:20/20, col="grey50", border="white")
 
 Heatmap of top 20 genes.
 
-```{r eval=FALSE}
+```{r}
 select = order(rowMeans(counts(dds,normalized=TRUE)),decreasing=TRUE)[1:20]
 nt = normTransform(dds) # defaults to log2(x+1)
 log2.norm.counts = assay(nt)[select,]
-df = as.data.frame(colData(dds)[,c("treatment")])
+df = as.data.frame(colData(dds)[,c("donor","harvest","treatment")])
 pheatmap(log2.norm.counts, cluster_rows=FALSE, show_rownames=FALSE,
          cluster_cols=FALSE, annotation_col=df)
 ```
-
+c("condition","type")
 ### Export Results
 
 Write to text file.
