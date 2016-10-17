@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=Alignment
+#SBATCH --job-name=Indexing
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=12
 #SBATCH --mem-per-cpu=4000
