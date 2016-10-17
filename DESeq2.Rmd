@@ -54,9 +54,15 @@ seqinfo(bamfiles[1])
 Define gene model (this is downloaded during ``Installation.bash`` automatically). Buidling the database takes a long time.
 
 ```{r}
-#gene_model_path = Sys.getenv("ENSEMBL")
-#gtffile = file.path(gene_model_path,"Homo_sapiens.GRCh37.75.gtf")
-#txdb = makeTxDbFromGFF(gtffile, format="gtf", circ_seqs=character())
+# txdb_file_name = "Homo_sapiens.GRCh37.75.gtf.Rdata"
+# if(!file.exists(txdb_file_name)) {
+#   gene_model_path = Sys.getenv("ENSEMBL")
+#   gtffile = file.path(gene_model_path,"Homo_sapiens.GRCh37.75.gtf")
+#   txdb = makeTxDbFromGFF(gtffile, format="gtf", circ_seqs=character())
+#   save(txdb,file = txdb_file_name)
+# } else {
+#     load(txdb_file_name)
+# }
 ```
 
 As an alternative, we can use the prefabricated database.
@@ -73,20 +79,14 @@ ebg = exonsBy(txdb, by="gene")
 ebg
 ```
 
-Read counting step. We save the *SummarizedExperiment* so that we don't need to rerun the counting step again.
+Read counting step.
 
 ```{r}
-se_file_name = "se.Rdata"
-if(!file.exists(se_file_name)) {
-  se = summarizeOverlaps(features=ebg, reads=bamfiles,
+se = summarizeOverlaps(features=ebg, reads=bamfiles,
                        mode="Union",
                        singleEnd=FALSE,
                        ignore.strand=TRUE,
                        fragments=TRUE )
-  save(se,file = "se.Rdata")
-} else {
-  load(se_file_name)
-}
 se
 dim(se)
 rowRanges(se)
