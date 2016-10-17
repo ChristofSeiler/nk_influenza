@@ -3,8 +3,8 @@
 #SBATCH --job-name=DESeq2
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=12
-#SBATCH --mem-per-cpu=12GB
-#SBATCH --time=16:00:00
+#SBATCH --mem-per-cpu=10GB
+#SBATCH --time=08:00:00
 #SBATCH --partition=bigmem
 #SBATCH --qos=bigmem
 
