@@ -159,7 +159,7 @@ df = as.data.frame(colData(dds)[,c("donor","harvest","treatment")])
 pheatmap(log2.norm.counts, cluster_rows=FALSE, show_rownames=FALSE,
          cluster_cols=FALSE, annotation_col=df)
 ```
-c("condition","type")
+
 ### Export Results
 
 Write to text file.
