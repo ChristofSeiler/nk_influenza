@@ -45,7 +45,7 @@ register(MulticoreParam(workers = n_cores))
 Import BAM file into R.
 
 ```{r}
-csvfile = file.path("sample_table_UI_H3N2.csv")
+csvfile = file.path("sample_table.csv")
 sample_table = read.csv(csvfile,row.names=1)
 file_names = paste0(sample_table$name,"_STAR.bam")
 bamfiles = BamFileList(file_names, yieldSize=2000000)
@@ -113,7 +113,8 @@ Change reference treatment to uninfected UI. Optimize the number of genes which 
 dds = DESeqDataSet(se, design = ~ harvest + donor + treatment)
 dds$treatment = relevel(dds$treatment, ref="UI")
 dds = DESeq(dds)
-res = results(dds, alpha=0.1)
+contrast = c("treatment","UI","H1N1")
+res = results(dds, alpha=0.1, contrast=contrast)
 ```
 
 Order results table by the smallest adjusted p-value.
@@ -161,20 +162,20 @@ rld = rlog(dds, blind=FALSE)
 head(assay(rld), 3)
 ```
 
-Heatmap of top 20 genes.
+Heatmap of top 100 genes.
 
-```{r}
-select = order(rowMeans(counts(dds,normalized=TRUE)),decreasing=TRUE)[1:20]
-nt = normTransform(dds) # defaults to log2(x+1)
-log2.norm.counts = assay(nt)[select,]
+```{r fig.asp=1,fig.height=7}
+select = order(rowMeans(counts(dds,normalized=TRUE)),decreasing=TRUE)[1:100]
 df = as.data.frame(colData(dds)[,c("donor","harvest","treatment")])
-pheatmap(log2.norm.counts, cluster_rows=FALSE, show_rownames=FALSE,
+pheatmap(assay(rld)[select,], cluster_rows=FALSE, show_rownames=FALSE,
+         cluster_cols=FALSE, annotation_col=df)
+pheatmap(assay(rld)[select,], cluster_rows=TRUE, show_rownames=FALSE,
          cluster_cols=FALSE, annotation_col=df)
 ```
 
 Heatmap of the sample-to-sample distances.
 
-```{r}
+```{r fig.asp=1}
 sampleDists <- dist(t(assay(rld)))
 sampleDistMatrix <- as.matrix(sampleDists)
 colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
@@ -203,6 +204,5 @@ Write to text file.
 
 ```{r}
 write.csv(as.data.frame(res_ordered),
-          file=paste0(paste0(levels(colData(dds)$treatment),
-                             collapse = "_"),"_results.csv"))
+          file=paste0(paste0(contrast,collapse = "_"),"_results.csv"))
 ```
