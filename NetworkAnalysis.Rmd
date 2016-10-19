@@ -1,7 +1,7 @@
 ---
 title: "Gene Expression Network Analysis"
 author: Christof Seiler
-date: August, 2016
+date: October, 2016
 output: html_document
 ---
 
@@ -36,24 +36,17 @@ library(visNetwork)
 
 ## Load Data
 
-Load example dataset. Replace this with your own list of pvalues.
+Remove genes with NA values. From the (DESeq2 documentation)[https://www.bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.pdf]. Some values in the results table can be set to NA for one of the following reasons:
+
+1. If within a row, all samples have zero counts, the baseMean column will be zero, and the log2 fold change estimates, p-value and adjusted p-value will all be set to NA.
+2. If a row contains a sample with an extreme count outlier then the p-value and adjusted p-value will be set to NA. These outlier counts are detected by Cook's distance.
+3. If a row is filtered by automatic independent filtering, for having a low mean normalized count, then only the adjusted p-value will be set to NA.
 
 ```{r}
-diff_exp = read.csv("Cuffdiff LK_2_5_11_13.csv")
-# remove no test cases
-excludeGenesFraction = sum(diff_exp$status == "NOTEST")/length(diff_exp$status)
-excludeGenesFraction
-diff_exp = diff_exp[!diff_exp$status == "NOTEST",]
-# remove NAs in fold changes
-foldChanges = as.numeric(as.character(diff_exp$log2.fold_change.))
-diff_exp$log2.fold_change. = foldChanges
-NAs = is.na(foldChanges)
-diff_exp = diff_exp[!NAs,]
-# remove Infs in fold changes
-Infs = is.infinite(diff_exp$log2.fold_change.)
-diff_exp = diff_exp[!Infs,]
+diff_exp = read.csv("treatment_H1N1_H3N2_results.csv")
 dim(diff_exp)
-plot(diff_exp$log2.fold_change.)
+diff_exp = na.omit(diff_exp)
+dim(diff_exp)
 ```
 
 ## Download Gene Network
@@ -78,7 +71,7 @@ dim(string_proteins)
 Map gene names to identifiers used in the database.
 
 ```{r}
-mapped = string_db$map(diff_exp, "gene", removeUnmappedRows = FALSE)
+mapped = string_db$map(diff_exp, "X", removeUnmappedRows = FALSE)
 interactions = string_db$get_interactions(mapped$STRING_id)
 interactions = data.frame(from=interactions$from,to=interactions$to,combined_score=interactions$combined_score)
 dim(interactions)
@@ -90,8 +83,8 @@ head(interactions)
 Fit a Beta-Uniform model.
 
 ```{r fig.width=12}
-pval = mapped$p_value
-names(pval) = mapped$gene
+pval = mapped$pvalue
+names(pval) = mapped$STRING_id
 fb = fitBumModel(pval)
 fb
 ```
@@ -102,11 +95,6 @@ First we make convert the interaction table into an igraph object and make the n
 
 ```{r}
 network = graph_from_data_frame(interactions)
-revMappedNames = sapply(names(V(network)),
-                        function(string_id)
-                          paste(mapped[which(string_id == mapped$STRING_id),]$gene,collapse = "/")
-                        )
-V(network)$name = unlist(revMappedNames)
 ```
 
 Then we search for the optimal subgraph.
@@ -117,14 +105,20 @@ module = runFastHeinz(network, scores)
 module
 ```
 
-Differential expression between is coloured in red and green, where green shows an upregulation in the first condition and red an upregulation in second condition. The shape of the nodes depicts the score: rectangles indicate a negative score, circles a positive score.
+Here the list of nodes within that module.
+
+```{r}
+mapped[which(mapped$STRING_id %in% names(V(module))),]
+```
+
+Differential expression is coloured in red (upregulated) and green (downregulated). Scores are represented with shapes: rectangles are negative and circles are positive scores.
 
 ```{r fig.width=12, fig.height=12}
 if(length(V(module)) > 0) {
   par(mfrow=c(1,1))
-  logFC = na.omit(mapped$log2.fold_change.)
-  names(logFC) = mapped$gene
-  plotModule(module, scores = scores, diff.expr = logFC)
+  logFC = mapped$log2FoldChange
+  names(logFC) = mapped$STRING_id
+  plotModule(module, diff.expr = logFC)
 } else {
   message("no signficant subgraph found")
 }
