@@ -14,6 +14,10 @@ indexing: Indexing_STAR.sbatch $BOWTIE_INDEXES/Homo_sapiens/NCBI/GRCh38/Sequence
 install:
 	bash Installation.bash
 
+# get cluster update
+check:
+    qstat="squeue | grep ${USER}"
+
 # clean up
 clean:
 	rm slurm-*.out

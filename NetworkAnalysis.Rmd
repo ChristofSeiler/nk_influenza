@@ -36,7 +36,7 @@ library(visNetwork)
 
 ## Load Data
 
-Remove genes with NA values. From the [DESeq2 documentation](https://www.bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.pdf). Some values in the results table can be set to NA for one of the following reasons:
+Remove genes with NA values. As indicated in the [DESeq2 documentation](https://www.bioconductor.org/packages/devel/bioc/vignettes/DESeq2/inst/doc/DESeq2.pdf), some values in the results table can be set to NA for one of the following reasons:
 
 1. If within a row, all samples have zero counts, the baseMean column will be zero, and the log2 fold change estimates, p-value and adjusted p-value will all be set to NA.
 2. If a row contains a sample with an extreme count outlier then the p-value and adjusted p-value will be set to NA. These outlier counts are detected by Cook's distance.

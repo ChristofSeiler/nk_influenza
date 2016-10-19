@@ -29,19 +29,19 @@ wget ftp://igenome:G3nom3s4u@ussd-ftp.illumina.com/Homo_sapiens/NCBI/GRCh38/Homo
 tar -xvzf Homo_sapiens_NCBI_GRCh38.tar.gz
 echo "export BOWTIE_INDEXES=$BOWTIE_INDEXES" >> ~/.bash_profile
 
-# download gene model
-GENE_MODEL=${INSTALL_DIR}/Gene_Model
-mkdir $GENE_MODEL
-cd $GENE_MODEL
-wget ftp://ftp.ensembl.org/pub/release-86/gtf/homo_sapiens/Homo_sapiens.GRCh38.86.gtf.gz
-gunzip Homo_sapiens.GRCh38.86.gtf.gz
-echo "export GENE_MODEL=$GENE_MODEL" >> ~/.bash_profile
+## download gene model
+#GENE_MODEL=${INSTALL_DIR}/Gene_Model
+#mkdir $GENE_MODEL
+#cd $GENE_MODEL
+#wget ftp://ftp.ensembl.org/pub/release-86/gtf/homo_sapiens/Homo_sapiens.GRCh38.86.gtf.gz
+#gunzip Homo_sapiens.GRCh38.86.gtf.gz
+#echo "export GENE_MODEL=$GENE_MODEL" >> ~/.bash_profile
 
-# download ENSEMBLE genome and annotations
-wget http://labshare.cshl.edu/shares/gingeraslab/www-data/dobin/STAR/STARgenomes/ENSEMBL/homo_sapiens/ENSEMBL.homo_sapiens.release-75.tgz
-tar -xvzf ENSEMBL.homo_sapiens.release-75.tgz
-ENSEMBL=${INSTALL_DIR}/ENSEMBL.homo_sapiens.release-75
-echo "export ENSEMBL=$ENSEMBL" >> ~/.bash_profile
+## download ENSEMBLE genome and annotations
+#wget http://labshare.cshl.edu/shares/gingeraslab/www-data/dobin/STAR/STARgenomes/ENSEMBL/homo_sapiens/ENSEMBL.homo_sapiens.release-75.tgz
+#tar -xvzf ENSEMBL.homo_sapiens.release-75.tgz
+#ENSEMBL=${INSTALL_DIR}/ENSEMBL.homo_sapiens.release-75
+#echo "export ENSEMBL=$ENSEMBL" >> ~/.bash_profile
 
 # define index directory for STAR
 STAR_INDEXES=$INSTALL_DIR/STAR_INDEXES
@@ -50,4 +50,4 @@ echo "export STAR_INDEXES=$STAR_INDEXES" >> ~/.bash_profile
 
 # install R/Bioconductor packages
 module load R/3.3.0
-R -e "source(\"https://bioconductor.org/biocLite.R\"); biocLite(\"Rsamtools\",suppressUpdates=TRUE); biocLite(\"GenomicFeatures\",suppressUpdates=TRUE); biocLite(\"BiocParallel\",suppressUpdates=TRUE); biocLite(\"DESeq2\",suppressUpdates=TRUE); biocLite(\"TxDb.Hsapiens.UCSC.hg38.knownGene\",suppressUpdates=TRUE); biocLite(\"GenomicAlignments\",suppressUpdates=TRUE); install.packages(\"pheatmap\",repos='http://cran.us.r-project.org')"
+R -e "source(\"https://bioconductor.org/biocLite.R\"); biocLite(c(\"Rsamtools\",\"GenomicFeatures\",\"BiocParallel\",\"DESeq2\",\"TxDb.Hsapiens.UCSC.hg38.knownGene\",\"GenomicAlignments\",\"BiocParallel\"),suppressUpdates=TRUE); install.packages(c(\"pheatmap\",\"RColorBrewer\",\"ggplot2\"),repos='http://cran.us.r-project.org')"
