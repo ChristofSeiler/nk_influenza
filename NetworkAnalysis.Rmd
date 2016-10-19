@@ -20,6 +20,7 @@ source("https://bioconductor.org/biocLite.R")
 biocLite("STRINGdb")
 biocLite("BioNet")
 biocLite("DLBCL")
+biocLite("org.Hs.eg.db")
 install.packages(c("stringr","igraph","visNetwork"))
 ```
 
@@ -32,6 +33,7 @@ library(DLBCL)
 library(stringr)
 library(igraph)
 library(visNetwork)
+library(org.Hs.eg.db)
 ```
 
 ## Load Data
@@ -100,25 +102,40 @@ network = graph_from_data_frame(interactions)
 Then we search for the optimal subgraph.
 
 ```{r}
-scores = scoreNodes(network, fb, fdr=0.01)
+fdr = 0.01
+scores = scoreNodes(network, fb, fdr=fdr)
 module = runFastHeinz(network, scores)
 module
 ```
 
-Here the list of nodes within that module.
+Here the list of nodes within that module. Map gene id to gene name.
 
 ```{r}
-mapped[which(mapped$STRING_id %in% names(V(module))),]
+gene_table = mapped[which(mapped$STRING_id %in% names(V(module))),]
+e2s = toTable(org.Hs.egSYMBOL)
+entrez_genes = gene_table$X
+symbol = unlist(sapply(entrez_genes,
+                       function(id) {
+                         matching_symbol = e2s$symbol[e2s$gene_id==id]
+                         if(length(matching_symbol)==0) matching_symbol = "No_Symbol_Found"
+                         matching_symbol
+                       }))
+#names(symbol) = NULL
+#mapped = cbind(mapped,symbol=symbol,stringsAsFactors=FALSE)
+gene_table = cbind(gene_table,symbol=symbol,stringsAsFactors=FALSE)
+gene_table
 ```
 
 Differential expression is coloured in red (upregulated) and green (downregulated). Scores are represented with shapes: rectangles are negative and circles are positive scores.
 
 ```{r fig.width=12, fig.height=12}
+node_symbol = sapply(names(V(module)),function(node_name) 
+  gene_table$symbol[which(gene_table$STRING_id == node_name)])
 if(length(V(module)) > 0) {
   par(mfrow=c(1,1))
   logFC = mapped$log2FoldChange
   names(logFC) = mapped$STRING_id
-  plotModule(module, diff.expr = logFC)
+  plotModule(module, diff.expr = logFC, labels = node_symbol)
 } else {
   message("no signficant subgraph found")
 }
@@ -128,7 +145,7 @@ Interactive visualization.
 
 ```{r fig.width=12, fig.height=12}
 if(length(V(module)) > 0) {
-  V(module)$label = names(V(module))
+  V(module)$label = node_symbol
   visIgraph(module, idToLabel = FALSE)
 } else {
   message("no signficant subgraph found")
@@ -139,9 +156,19 @@ Interactive visualization with physics animation.
 
 ```{r fig.width=12, fig.height=12}
 if(length(V(module)) > 0) {
-  V(module)$label = names(V(module))
+  V(module)$label = node_symbol
   visIgraph(module, idToLabel = FALSE, physics = TRUE)
 } else {
   message("no signficant subgraph found")
 }
+```
+
+## Compare to Known Pathways
+
+Calculate pathway coverage.
+
+```{r}
+interaction_table = as.data.frame(get.edgelist(module))
+names(interaction_table) = c("proteinA","proteinB")
+interaction_table = data.frame(interaction_table,score=1-fdr)
 ```
