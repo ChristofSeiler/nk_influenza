@@ -153,20 +153,32 @@ Histogram of the p values. Exclude genes with only one count to avoid spikes.
 hist(res$pvalue[res$baseMean > 1], breaks=0:20/20, col="grey50", border="white")
 ```
 
-### Data Quality Assessment
-
-Extracting transformed values.
+Extracting transformed count values.
 
 ```{r}
 rld = rlog(dds, blind=FALSE)
 head(assay(rld), 3)
 ```
 
-Heatmap of top 100 genes.
+Heatmap of all significant genes.
+
+```{r}
+select = which(res$padj < 0.1)
+df = as.data.frame(colData(dds)[,c("donor","harvest","treatment")])
+subset = assay(rld)[select,c( which(df$treatment==contrast[2]), 
+                              which(df$treatment==contrast[3]) )]
+pheatmap(subset, cluster_rows=FALSE, show_rownames=FALSE,
+         cluster_cols=FALSE, annotation_col=df)
+pheatmap(subset, cluster_rows=TRUE, show_rownames=FALSE,
+         cluster_cols=FALSE, annotation_col=df)
+```
+
+### Data Quality Assessment
+
+Heatmap of top (highest mean count) 100 genes.
 
 ```{r fig.asp=1,fig.height=7}
 select = order(rowMeans(counts(dds,normalized=TRUE)),decreasing=TRUE)[1:100]
-df = as.data.frame(colData(dds)[,c("donor","harvest","treatment")])
 pheatmap(assay(rld)[select,], cluster_rows=FALSE, show_rownames=FALSE,
          cluster_cols=FALSE, annotation_col=df)
 pheatmap(assay(rld)[select,], cluster_rows=TRUE, show_rownames=FALSE,
