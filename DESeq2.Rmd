@@ -45,7 +45,7 @@ register(MulticoreParam(workers = n_cores))
 Import BAM file into R.
 
 ```{r}
-csvfile = file.path("sample_table.csv")
+csvfile = file.path("sample_table_monocyte.csv")
 sample_table = read.csv(csvfile,row.names=1)
 file_names = paste0(sample_table$name,"_tophat.bam")
 bamfiles = BamFileList(file_names, yieldSize=2000000)
