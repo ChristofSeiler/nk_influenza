@@ -16,7 +16,7 @@ install:
 
 # get cluster update
 check:
-    qstat="squeue | grep ${USER}"
+    squeue | grep ${USER}
 
 # clean up
 clean:
