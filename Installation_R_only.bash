@@ -9,6 +9,7 @@ cd $R_STUDIO
 wget https://download2.rstudio.org/rstudio-server-rhel-0.99.903-x86_64.rpm
 rpm2cpio rstudio-server-rhel-0.99.903-x86_64.rpm | cpio -idmv
 echo "export PATH=${R_STUDIO}/usr/lib/rstudio-server/bin/pandoc:\$PATH" >> ~/.bash_profile
+source ~/.bash_profile
 
 # install R/Bioconductor packages
 module load R/3.3.0

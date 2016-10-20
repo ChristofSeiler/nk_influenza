@@ -49,3 +49,6 @@ echo "export BOWTIE_INDEXES=$BOWTIE_INDEXES" >> ~/.bash_profile
 STAR_INDEXES=$INSTALL_DIR/STAR_INDEXES
 mkdir $STAR_INDEXES
 echo "export STAR_INDEXES=$STAR_INDEXES" >> ~/.bash_profile
+
+# load the new profile
+source ~/.bash_profile
