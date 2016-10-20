@@ -13,7 +13,7 @@ indexing: Indexing_STAR.sbatch $BOWTIE_INDEXES/Homo_sapiens/NCBI/GRCh38/Sequence
 # install and download resources
 install:
 	bash Installation.bash
-    bash Installation_R_only.bash
+	bash Installation_R_only.bash
 
 # get cluster update
 check:
@@ -22,5 +22,5 @@ check:
 # clean up
 clean:
 	rm slurm-*.out
-	rm *_results.csv
 	rm se.Rdata
+	rm *_results.csv
