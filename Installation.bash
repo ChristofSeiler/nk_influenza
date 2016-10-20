@@ -1,9 +1,9 @@
 #!/bin/bash
 
 INSTALL_DIR=$SCRATCH
-cd $INSTALL_DIR
 
 # install bowtie2
+cd $INSTALL_DIR
 wget https://sourceforge.net/projects/bowtie-bio/files/bowtie2/2.2.9/bowtie2-2.2.9-linux-x86_64.zip
 unzip bowtie2-2.2.9-linux-x86_64.zip
 echo "" >> .bash_profile
@@ -11,12 +11,14 @@ echo "# gene indexing and mapping" >> .bash_profile
 echo "export PATH=${INSTALL_DIR}/bowtie2-2.2.9:\$PATH" >> ~/.bash_profile
 
 # install tophat2
+cd $INSTALL_DIR
 wget https://ccb.jhu.edu/software/tophat/downloads/tophat-2.1.1.Linux_x86_64.tar.gz
 tar -xvzf tophat-2.1.1.Linux_x86_64.tar.gz
 mv tophat-2.1.1.Linux_x86_64 tophat-2.1.1
 echo "export PATH=${INSTALL_DIR}/tophat-2.1.1:\$PATH" >> ~/.bash_profile
 
 # install alpine
+cd $INSTALL_DIR
 wget https://github.com/alexdobin/STAR/archive/2.5.2b.tar.gz
 tar -xvzf 2.5.2b.tar.gz
 echo "export PATH=${INSTALL_DIR}/STAR-2.5.2b/bin/Linux_x86_64_static:\$PATH" >> ~/.bash_profile
