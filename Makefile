@@ -16,7 +16,7 @@ install:
 
 # get cluster update
 check:
-    squeue | grep ${USER}
+	squeue | grep ${USER}
 
 # clean up
 clean:
