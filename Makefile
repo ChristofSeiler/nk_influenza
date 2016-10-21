@@ -10,6 +10,10 @@ mapping: Alignment_STAR.bash Alignment_STAR.sbatch $STAR_INDEXES/SA
 indexing: Indexing_STAR.sbatch $BOWTIE_INDEXES/Homo_sapiens/NCBI/GRCh38/Sequence/Bowtie2Index/genome.fa $BOWTIE_INDEXES/Homo_sapiens/NCBI/GRCh38/Annotation/Genes/genes.gtf
 	sbatch Indexing_STAR.sbatch
 
+# gene mapping using tophat
+mapping_tophat: Alignment_tophat.bash Alignment_tophat.sbatch $BOWTIE_INDEXES/Homo_sapiens/NCBI/GRCh38/Sequence/Bowtie2Index/genome.fa
+    bash Alignment_tophat.bash
+
 # install and download resources
 install:
 	bash Installation.bash
