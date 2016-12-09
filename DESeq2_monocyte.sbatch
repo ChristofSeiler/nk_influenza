@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --job-name=DESeq2_monocytes
+#SBATCH --job-name=DESeq2_monocyte
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=19
 #SBATCH --mem-per-cpu=12GB
