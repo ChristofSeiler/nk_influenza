@@ -1,7 +1,6 @@
 # differential analysis
 da_monocyte: DESeq2_monocyte.sbatch DESeq2.Rmd NetworkAnalysis.Rmd
 	sbatch DESeq2_monocyte.sbatch
-
 da_nk: DESeq2_nk.sbatch DESeq2.Rmd NetworkAnalysis.Rmd
 	sbatch DESeq2_nk.sbatch
 
