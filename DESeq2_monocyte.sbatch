@@ -14,11 +14,11 @@ start=`date +%s`
 
 type=sample_table_monocyte.csv
 mapping=tophat
-R -e "rmarkdown::render('DESeq2.Rmd',params = list(type = '${type}',mapping = '${mapping}')"
+R -e "rmarkdown::render('DESeq2.Rmd',params = list(type = '${type}',mapping = '${mapping}'))"
 
 fdr=0.0001
 gene_list=treatment_H1N1_UI_tophat_results.csv
-R -e "rmarkdown::render('NetworkAnalysis.Rmd',params = list(fdr = '${fdr}',gene_list = '${gene_list}')"
+R -e "rmarkdown::render('NetworkAnalysis.Rmd',params = list(fdr = '${fdr}',gene_list = '${gene_list}'))"
 
 end=`date +%s`
 runtime=$((end-start))
