@@ -14,7 +14,7 @@ indexing: Indexing_STAR.sbatch $BOWTIE_INDEXES/Homo_sapiens/NCBI/GRCh38/Sequence
 
 # gene mapping using tophat
 mapping_tophat: Alignment_tophat.bash Alignment_tophat.sbatch $BOWTIE_INDEXES/Homo_sapiens/NCBI/GRCh38/Sequence/Bowtie2Index/genome.fa
-    bash Alignment_tophat.bash
+	bash Alignment_tophat.bash
 
 # install and download resources
 install:
