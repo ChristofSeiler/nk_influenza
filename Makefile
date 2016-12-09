@@ -1,6 +1,9 @@
 # differential analysis
-DESeq2: DESeq2.sbatch DESeq2.Rmd
-	sbatch DESeq2.sbatch
+da_monocytes: DESeq2_monocytes.sbatch DESeq2.Rmd NetworkAnalysis.Rmd
+	sbatch DESeq2_monocytes.sbatch
+
+da_nk: DESeq2_nk.sbatch DESeq2.Rmd NetworkAnalysis.Rmd
+	sbatch DESeq2_nk.sbatch
 
 # gene mapping using STAR
 mapping: Alignment_STAR.bash Alignment_STAR.sbatch $STAR_INDEXES/SA

@@ -3,6 +3,9 @@ title: "DESeq2 Workflow"
 output: html_document
 author: Christof Seiler
 date: October, 2016
+params:
+  type: "sample_table_monocyte.csv"
+  mapping: "tophat"
 ---
 
 ```{r setup, include=FALSE}
@@ -45,9 +48,10 @@ register(MulticoreParam(workers = n_cores))
 Import BAM file into R.
 
 ```{r}
-csvfile = file.path("sample_table_monocyte.csv")
+params
+csvfile = file.path(params$type)
 sample_table = read.csv(csvfile,row.names=1)
-file_names = paste0(sample_table$name,"_tophat.bam")
+file_names = paste0(sample_table$name,"_",params$mapping,".bam")
 bamfiles = BamFileList(file_names, yieldSize=2000000)
 seqinfo(bamfiles[1])
 ```
@@ -112,7 +116,7 @@ Change reference treatment to uninfected UI. Optimize the number of genes which 
 ```{r}
 dds = DESeqDataSet(se, design = ~ harvest + donor + treatment)
 dds = DESeq(dds)
-contrast = c("treatment","H1N1","H3N2")
+contrast = c("treatment","H1N1","UI")
 res = results(dds, alpha=0.1, contrast=contrast)
 ```
 
@@ -213,5 +217,5 @@ Write to text file.
 
 ```{r}
 write.csv(as.data.frame(res_ordered),
-          file=paste0(paste0(contrast,collapse = "_"),"_results.csv"))
+          file=paste0(paste0(contrast,collapse = "_"),"_",params$mapping,"_results.csv"))
 ```
