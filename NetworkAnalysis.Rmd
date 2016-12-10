@@ -118,13 +118,14 @@ module_list = mclapply(fdr_vec,function(fdr) {
   module = runFastHeinz(network, scores)
   module
 },mc.cores = n_cores)
+save(module_list,file = "module_list.Rdata")
 module_lengths = sapply(module_list,function(module) length(V(module)))
 module_lengths
 num_nodes = as.numeric(params$num_nodes)
 module_select = module_lengths <= num_nodes
 module_select[length(module_select)] = TRUE
 module_id = which(module_select)[1]
-module = module_list[module_id]
+module = module_list[[module_id]]
 module
 ```
 
