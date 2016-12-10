@@ -5,6 +5,7 @@ date: October, 2016
 output: html_document
 params:
   fdr: 0.0001
+  num_nodes: 100
   gene_list: "treatment_H1N1_UI_tophat_results.csv"
 ---
 
@@ -39,6 +40,8 @@ library(KEGGREST)
 library(stringr)
 library(igraph)
 library(visNetwork)
+n_cores = as.integer(Sys.getenv("SLURM_NTASKS"))
+n_cores
 ```
 
 ## Load Data
@@ -108,9 +111,20 @@ network = graph_from_data_frame(interactions)
 Then we search for the optimal subgraph.
 
 ```{r}
-fdr = as.numeric(params$fdr)
-scores = scoreNodes(network, fb, fdr=fdr)
-module = runFastHeinz(network, scores)
+fdr_largest = as.numeric(params$fdr)
+fdr_vec = fdr_largest/(10^(0:(n_cores-1)))
+module_list = mclapply(fdr_vec,function(fdr) {
+  scores = scoreNodes(network, fb, fdr=fdr)
+  module = runFastHeinz(network, scores)
+  module
+},mc.cores = n_cores)
+module_lengths = sapply(module_list,function(module) length(V(module)))
+module_lengths
+num_nodes = as.numeric(params$num_nodes)
+module_select = module_lengths <= num_nodes
+module_select[length(module_select)] = TRUE
+module_id = which(module_select)[1]
+module = module_list[module_id]
 module
 ```
 
