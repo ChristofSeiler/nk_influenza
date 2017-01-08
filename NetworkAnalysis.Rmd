@@ -118,7 +118,6 @@ module_list = mclapply(fdr_vec,function(fdr) {
   module = runFastHeinz(network, scores)
   module
 },mc.cores = n_cores)
-save(module_list,file = "module_list.Rdata")
 module_lengths = sapply(module_list,function(module) length(V(module)))
 module_lengths
 num_nodes = as.numeric(params$num_nodes)
@@ -212,4 +211,10 @@ gene_overlap = t(sapply(all_pathways,function(pathway) {
   }))
 ordered_ids = order(unlist(gene_overlap[,"overlap"]),decreasing = TRUE)
 head(gene_overlap[ordered_ids,],10)
+```
+
+## Export Results
+
+```{r}
+save(module_list,file = "module_list.Rdata")
 ```

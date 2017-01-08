@@ -37,6 +37,7 @@ library(GenomicAlignments)
 library(pheatmap)
 library(RColorBrewer)
 library(ggplot2)
+library(org.Hs.eg.db)
 library(BiocParallel)
 n_cores = as.integer(Sys.getenv("SLURM_NTASKS"))
 n_cores
@@ -104,7 +105,6 @@ rowRanges(se)
 str(metadata(rowRanges(se)))
 colData(se) = DataFrame(sample_table)
 colData(se)
-save(se,file = "se.Rdata")
 ```
 
 This completes the counting step, we have counted the fragments which overlap the genes in the gene model we specified. Now we can feed this into many different kind of linear models in Bioconductor, one option is to use the ``DESeq2`` package.
@@ -118,12 +118,6 @@ dds = DESeqDataSet(se, design = ~ harvest + donor + treatment)
 dds = DESeq(dds)
 contrast = c("treatment","H1N1","UI")
 res = results(dds, alpha=0.1, contrast=contrast)
-```
-
-Order results table by the smallest adjusted p-value.
-
-```{r}
-res_ordered <- res[order(res$padj),]
 ```
 
 Some basics stats.
@@ -174,6 +168,25 @@ pheatmap(subset, cluster_rows=TRUE, show_rownames=FALSE,
          cluster_cols=FALSE, annotation_col=df)
 ```
 
+Normalized counts plus a pseudocount of 0.5 are shown for one gene. To call ``plotCountsAnnotated`` outside of this Rmd file, you need to load the ``dds`` object and the packages ``DESeq2``, ``ggplot2`` and ``org.Hs.eg.db``.
+
+```{r}
+#load("dds.Rdata")
+#library(DESeq2)
+#library(ggplot2)
+#library(org.Hs.eg.db)
+plotCountsAnnotated =function(gene_symbol) {
+  e2s = toTable(org.Hs.egSYMBOL)
+  gene_id = e2s$gene_id[e2s$symbol==gene_symbol]
+  d = plotCounts(dds, gene=gene_id, intgroup=c("treatment","harvest","donor"),returnData=TRUE)
+  ggplot(d, aes(x=treatment, y=count, col=harvest, shape=donor)) +
+    geom_point(position=position_jitter(w=0.3,h=0), size=4) +
+    scale_y_log10() + 
+    ggtitle(gene_symbol)
+}
+plotCountsAnnotated("IFNB1")
+```
+
 ### Data Quality Assessment
 
 Heatmap of top (highest mean count) 100 genes.
@@ -213,9 +226,9 @@ plotPCA(rld, intgroup=c("donor"))
 
 ### Export Results
 
-Write to text file.
-
 ```{r}
-write.csv(as.data.frame(res_ordered),
-          file=paste0(paste0(contrast,collapse = "_"),"_",params$mapping,"_results.csv"))
+save(se,file = "se.Rdata")
+save(dds,file = "dds.Rdata")
+write.csv(as.data.frame(res),
+          file = paste0(paste0(contrast,collapse = "_"),"_",params$mapping,"_results.csv"))
 ```
