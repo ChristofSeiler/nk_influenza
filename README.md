@@ -71,22 +71,22 @@ Here are the steps:
 1. In RStudio change to the dropbox directory where you have the dds.Rdata file
 2. Set it as the working directory
 3. Now execute the R code than you can copy from the DESeq2.html file:
-```
-#load("dds.Rdata")
-#library(DESeq2)
-#library(ggplot2)
-#library(org.Hs.eg.db)
-plotCountsAnnotated =function(gene_symbol) {
-  e2s = toTable(org.Hs.egSYMBOL)
-  gene_id = e2s$gene_id[e2s$symbol==gene_symbol]
-  d = plotCounts(dds, gene=gene_id, intgroup=c("treatment","harvest","donor"),returnData=TRUE)
-  ggplot(d, aes(x=treatment, y=count, col=harvest, shape=donor)) +
-    geom_point(position=position_jitter(w=0.3,h=0), size=4) +
-    scale_y_log10() + 
-    ggtitle(gene_symbol)
-}
-plotCountsAnnotated("IFNB1")
-```
+      ```
+      load("dds.Rdata")
+      library(DESeq2)
+      library(ggplot2)
+      library(org.Hs.eg.db)
+      plotCountsAnnotated =function(gene_symbol) {
+        e2s = toTable(org.Hs.egSYMBOL)
+        gene_id = e2s$gene_id[e2s$symbol==gene_symbol]
+        d = plotCounts(dds, gene=gene_id, intgroup=c("treatment","harvest","donor"),returnData=TRUE)
+        ggplot(d, aes(x=treatment, y=count, col=harvest, shape=donor)) +
+          geom_point(position=position_jitter(w=0.3,h=0), size=4) +
+          scale_y_log10() + 
+          ggtitle(gene_symbol)
+      }
+      plotCountsAnnotated("IFNB1")
+      ```
 4. Plot other genes: 
 ```
 plotCountsAnnotated("UBC")
