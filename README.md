@@ -103,3 +103,19 @@ plotCountsAnnotated("IFNB1")
 ```
 plotCountsAnnotated("UBC")
 ```
+
+* To get a list of gene symbols:
+
+```
+da_res = read.csv("treatment_H1N1_UI_tophat_results.csv")
+dim(da_res)
+da_res = na.omit(da_res)
+e2s = toTable(org.Hs.egSYMBOL)
+symbol = unlist(sapply(da_res$X,
+                       function(id) {
+                         matching_symbol = e2s$symbol[e2s$gene_id==id]
+                         if(length(matching_symbol)==0) matching_symbol = "No_Symbol_Found"
+                         matching_symbol
+                       }))
+head(symbol)
+```
