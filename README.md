@@ -70,7 +70,7 @@ Here are the steps:
 
 * In RStudio change to the dropbox directory where you have the dds.Rdata file
 * Set it as the working directory
-* Now execute the R code than you can copy from the DESeq2.html file:
+* Now execute the R code that you can copy from the DESeq2.html file:
 
 ```
 load("dds.Rdata")
