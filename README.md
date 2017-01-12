@@ -66,6 +66,15 @@ Some R packgaes:
 
 ## Plot Gene Counts
 
+Make sure all packages are installed. If not do this:
+
+```
+source("https://bioconductor.org/biocLite.R")
+biocLite("DESeq2")
+biocLite("org.Hs.eg.db")
+install.packages("ggplot2")
+```
+
 Here are the steps:
 
 * In RStudio change to the dropbox directory where you have the dds.Rdata file
