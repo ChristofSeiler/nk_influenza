@@ -217,6 +217,7 @@ Principal component plot of the samples.
 data = plotPCA(rld, intgroup=c("treatment","harvest"), returnData=TRUE)
 percentVar = round(100 * attr(data, "percentVar"))
 ggplot(data, aes(PC1, PC2, color=treatment, shape=harvest)) +
+  theme_bw() +
   geom_point(size=3) +
   xlab(paste0("PC1: ",percentVar[1],"% variance")) +
   ylab(paste0("PC2: ",percentVar[2],"% variance")) +
