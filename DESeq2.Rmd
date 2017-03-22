@@ -6,6 +6,8 @@ date: October, 2016
 params:
   type: "sample_table_monocyte.csv"
   mapping: "tophat"
+  condition: "H1N1"
+  baseline: "H3N2"
 ---
 
 ```{r setup, include=FALSE}
@@ -116,7 +118,7 @@ Change reference treatment to uninfected UI. Optimize the number of genes which 
 ```{r}
 dds = DESeqDataSet(se, design = ~ harvest + donor + treatment)
 dds = DESeq(dds)
-contrast = c("treatment","H1N1","UI")
+contrast = c("treatment",condition,baseline)
 res = results(dds, alpha=0.1, contrast=contrast)
 ```
 
