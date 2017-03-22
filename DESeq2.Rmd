@@ -118,7 +118,7 @@ Change reference treatment to uninfected UI. Optimize the number of genes which 
 ```{r}
 dds = DESeqDataSet(se, design = ~ harvest + donor + treatment)
 dds = DESeq(dds)
-contrast = c("treatment",condition,baseline)
+contrast = c("treatment",params$condition,params$baseline)
 res = results(dds, alpha=0.1, contrast=contrast)
 ```
 
