@@ -12,7 +12,7 @@ module load R/3.3.0
 
 start=`date +%s`
 
-type=sample_table_monocyte.csv
+type=sample_table_monocyte_all.csv
 mapping=tophat
 condition=H1N1
 baseline=H3N2
