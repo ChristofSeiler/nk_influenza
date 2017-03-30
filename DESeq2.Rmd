@@ -12,7 +12,6 @@ params:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-theme_set(theme_bw())
 strain_colors = NULL
 strain_colors$H1N1 = "lightseagreen"
 strain_colors$H3N2 = "dodgerblue"
@@ -49,6 +48,7 @@ library(BiocParallel)
 n_cores = as.integer(Sys.getenv("SLURM_NTASKS"))
 n_cores
 register(MulticoreParam(workers = n_cores))
+theme_set(theme_bw())
 ```
 
 ### Prepare Count Matrix
