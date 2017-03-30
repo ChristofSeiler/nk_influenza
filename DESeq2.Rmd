@@ -12,6 +12,11 @@ params:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+theme_set(theme_bw())
+strain_colors = NULL
+strain_colors$H1N1 = "lightseagreen"
+strain_colors$H3N2 = "dodgerblue"
+strain_colors$UI = "slateblue"
 ```
 
 ## Goal
@@ -218,13 +223,15 @@ Principal component plot of the samples.
 ```{r}
 data = plotPCA(rld, intgroup=c("treatment","harvest"), returnData=TRUE)
 percentVar = round(100 * attr(data, "percentVar"))
+ind = which(names(strain_colors) %in% levels(data[,"treatment"]))
+strain_colors_sel = unlist(strain_colors[ind])
 ggplot(data, aes(PC1, PC2, color=treatment, shape=harvest)) +
-  theme_bw() +
   geom_point(size=3) +
   xlab(paste0("PC1: ",percentVar[1],"% variance")) +
   ylab(paste0("PC2: ",percentVar[2],"% variance")) +
-  coord_fixed()
-plotPCA(rld, intgroup=c("donor")) + theme_bw()
+  coord_fixed() + 
+  scale_color_manual(values=strain_colors_sel)
+plotPCA(rld, intgroup=c("donor"))
 ```
 
 ### Export Results

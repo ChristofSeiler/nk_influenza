@@ -11,6 +11,7 @@ params:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+theme_set(theme_bw())
 ```
 
 This Rmd file contains a minimal network analysis pipeline using the packages ``STRINGdb`` and ``BioNet``.
