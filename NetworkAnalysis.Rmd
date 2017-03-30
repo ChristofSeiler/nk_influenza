@@ -42,7 +42,6 @@ library(igraph)
 library(visNetwork)
 n_cores = as.integer(Sys.getenv("SLURM_NTASKS"))
 n_cores
-theme_set(theme_bw())
 ```
 
 ## Load Data
