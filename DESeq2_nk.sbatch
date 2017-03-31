@@ -12,7 +12,7 @@ module load R/3.3.0
 
 start=`date +%s`
 
-type=sample_table_nk.csv
+type=sample_table_nk_all.csv
 mapping=tophat
 R -e "rmarkdown::render('DESeq2.Rmd',params = list(type = '${type}',mapping = '${mapping}'))"
 
