@@ -46,8 +46,8 @@ n_cores
 register(MulticoreParam(workers = n_cores))
 theme_set(theme_bw())
 strain_colors = NULL
-strain_colors$H1N1 = "#F8766D"
-strain_colors$H3N2 = "#B79F00"
+strain_colors$H1N1 = "#619CFF"
+strain_colors$H3N2 = "#F8766D"
 strain_colors$UI = "#00BA38"
 ```
 
