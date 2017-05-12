@@ -143,6 +143,9 @@ Shows the log2 fold changes.
 
 ```{r}
 plotMA(res, main="DESeq2", ylim=c(-2,2))
+pdf(file = paste0("MA_",paste0(contrast,collapse = "_"),"_",params$mapping,".pdf"),width = 5,height = 4)
+plotMA(res, main="DESeq2", ylim=c(-2,2))
+dev.off()
 ```
 
 More infos about variables and tests.
@@ -225,13 +228,17 @@ data = plotPCA(rld, intgroup=c("treatment","harvest"), returnData=TRUE)
 percentVar = round(100 * attr(data, "percentVar"))
 ind = which(names(strain_colors) %in% levels(data[,"treatment"]))
 strain_colors_sel = unlist(strain_colors[ind])
-ggplot(data, aes(PC1, PC2, color=treatment, shape=harvest)) +
+ggobj = ggplot(data, aes(PC1, PC2, color=treatment, shape=harvest)) +
   geom_point(size=3) +
   xlab(paste0("PC1: ",percentVar[1],"% variance")) +
   ylab(paste0("PC2: ",percentVar[2],"% variance")) +
   coord_fixed() + 
   scale_color_manual(values=strain_colors_sel)
-plotPCA(rld, intgroup=c("donor"))
+ggsave(ggobj,filename = paste0("PCA_treatment_harvest_",paste0(contrast,collapse = "_"),"_",params$mapping,".pdf"),
+       width = 5,height = 3)
+ggobj = plotPCA(rld, intgroup=c("donor"))
+ggsave(ggobj,filename = paste0("PCA_group_",paste0(contrast,collapse = "_"),"_",params$mapping,".pdf"),
+       width = 5,height = 3)
 ```
 
 ### Export Results
