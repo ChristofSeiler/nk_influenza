@@ -16,11 +16,11 @@ type=sample_table_nk_all.csv
 mapping=tophat
 condition=H1N1
 baseline=H3N2
-R -e "rmarkdown::render('DESeq2.Rmd',params = list(type = '${type}',mapping = '${mapping}',condition = '${condition}',baseline = '${baseline}'))"
+gene_list=treatment_${condition}_${baseline}_${mapping}_results.csv
+R -e "rmarkdown::render('DESeq2.Rmd',params = list(type = '${type}',mapping = '${mapping}',condition = '${condition}',baseline = '${baseline}',gene_list = '${gene_list}'))"
 
 fdr=0.00000000000001
 num_nodes=40
-gene_list=treatment_${condition}_${baseline}_${mapping}_results.csv
 R -e "rmarkdown::render('NetworkAnalysis.Rmd',params = list(fdr = '${fdr}',num_nodes = '${num_nodes}',gene_list = '${gene_list}'))"
 
 end=`date +%s`

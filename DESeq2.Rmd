@@ -8,6 +8,7 @@ params:
   mapping: "tophat"
   condition: "H1N1"
   baseline: "H3N2"
+  gene_list: "treatment_H1N1_H3N2_tophat_results.csv"
 ---
 
 ```{r setup, include=FALSE}
@@ -248,6 +249,5 @@ ggsave(ggobj,filename = paste0("PCA_group_",paste0(contrast,collapse = "_"),"_",
 ```{r}
 save(se,file = "se.Rdata")
 save(dds,file = "dds.Rdata")
-write.csv(as.data.frame(res),
-          file = paste0(paste0(contrast,collapse = "_"),"_",params$mapping,"_results.csv"))
+write.csv(as.data.frame(res),file = params$gene_list)
 ```
