@@ -20,7 +20,7 @@ R -e "rmarkdown::render('DESeq2.Rmd',params = list(type = '${type}',mapping = '$
 
 fdr=0.1
 num_nodes=200
-gene_list=treatment_${condition}_${baseline}_results.csv
+gene_list=treatment_${condition}_${baseline}_${mapping}_results.csv
 R -e "rmarkdown::render('NetworkAnalysis.Rmd',params = list(fdr = '${fdr}',num_nodes = '${num_nodes}',gene_list = '${gene_list}'))"
 
 end=`date +%s`
