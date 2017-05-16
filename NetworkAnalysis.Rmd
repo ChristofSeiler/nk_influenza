@@ -155,9 +155,10 @@ if(length(V(module)) > 0) {
   par(mfrow=c(1,1))
   logFC = mapped$log2FoldChange
   names(logFC) = mapped$STRING_id
-  plotModule(module, diff.expr = logFC, labels = node_symbol, layout = layout.kamada.kawai)
+  main = paste("FDR =",fdr_vec[module_id])
+  plotModule(module, diff.expr = logFC, labels = node_symbol, layout = layout.kamada.kawai,main = main)
   pdf(file = str_replace(params$gene_list,".csv","_Network.pdf"),width = 8,height = 8)
-  plotModule(module, diff.expr = logFC, labels = node_symbol, layout = layout.kamada.kawai)
+  plotModule(module, diff.expr = logFC, labels = node_symbol, layout = layout.kamada.kawai,main = main)
   dev.off()
 } else {
   message("no signficant subgraph found")
