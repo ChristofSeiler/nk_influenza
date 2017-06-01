@@ -71,6 +71,14 @@ ebg = exonsBy(txdb, by="tx")
 ebg
 ```
 
+Note that before passing txbygn to summarizeOverlaps, you should confirm that the seqlevels (chromosome names) in
+it match those in the BAM file. See ?renameSeqlevels, ?keepSeqlevels and ?seqlevels for examples of renaming
+seqlevels.
+
+```{r}
+# TODO
+```
+
 Read counting step.
 
 ```{r}
