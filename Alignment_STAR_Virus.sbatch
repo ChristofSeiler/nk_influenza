@@ -12,7 +12,7 @@ R1=$1
 R2=$2
 VIRUS=$3
 
-# sequence mapping with 8 cores
+# multithreaded sequence mapping
 STAR \
 --runThreadN 4 \
 --genomeDir ../${VIRUS}_index \
