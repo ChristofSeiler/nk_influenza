@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=4
 #SBATCH --mem-per-cpu=2000
-#SBATCH --time=03:00:00
+#SBATCH --time=04:00:00
 #SBATCH --partition=normal
 
 # input

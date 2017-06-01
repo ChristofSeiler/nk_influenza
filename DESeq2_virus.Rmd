@@ -60,7 +60,7 @@ bamfiles = BamFileList(file_names)
 Define gene model. Downloaded gff files from fludb.org.
 
 ```{r}
-gff_file = "A_California_07_2009.gff"
+gff_file = "A_California_07_2009_GffResults.gff"
 txdb = makeTxDbFromGFF(gff_file,format = "gff3")
 ```
 

@@ -7,7 +7,7 @@ mkdir ${VIRUS}_index
 STAR \
 --runMode genomeGenerate \
 --genomeDir ${VIRUS}_index \
---genomeFastaFiles ${VIRUS}.fasta \
+--genomeFastaFiles ${VIRUS}_GenomicFastaResults.fasta \
 --genomeSAindexNbases 6
 
 # sequence aligment
