@@ -26,10 +26,6 @@ library(ggplot2)
 library(reshape2)
 library(pheatmap)
 theme_set(theme_bw())
-strain_colors = NULL
-strain_colors$H1N1 = "#619CFF"
-strain_colors$H3N2 = "#F8766D"
-strain_colors$UI = "#00BA38"
 ```
 
 ## Prepare Count Matrix
@@ -113,7 +109,7 @@ count_sample_combo = merge(t(counts_normalized),sample_table,by="row.names")
 count_sample_combo_long = melt(count_sample_combo,
                                id.vars = c("Row.names","name","treatment","harvest","donor"))
 ggplot(count_sample_combo_long, aes(x=treatment, y=value, col=harvest, shape=donor)) +
-  geom_point(position=position_jitter(w=0.3,h=0), size=4) + 
+  geom_point(position=position_jitter(w=0.3,h=0), size=3) + 
   scale_y_log10() +
   facet_wrap(~variable,nrow = 2) +
   ylab("size factor normalized log10 transformed counts")
