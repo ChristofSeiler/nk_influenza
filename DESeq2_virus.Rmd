@@ -1,11 +1,11 @@
 ---
-title: "Expression of Influenza Strain"
+title: "Transcription of Influenza Strain"
 output: html_document
 author: Christof Seiler
 date: June, 2017
 params:
   type: "sample_table_monocyte_all.csv"
-  virus: "A_California_07_2009"
+  virus: "A_Victoria_361_2011"
 ---
 
 ```{r setup, include=FALSE}
@@ -14,9 +14,10 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Goal
 
-Count influenza strain gene expression in monocyte co-culture.
+Count influenza strain gene expression in monocyte co-culture. The two strains are:
 
-Load packages.
+* A_California_07_2009
+* A_Victoria_361_2011
 
 ```{r message=FALSE}
 library(Rsamtools)
@@ -24,8 +25,10 @@ library(GenomicFeatures)
 library(GenomicAlignments)
 library(ggplot2)
 library(reshape2)
+library(devtools)
 library(pheatmap)
 theme_set(theme_bw())
+params
 ```
 
 ## Prepare Count Matrix
@@ -33,7 +36,6 @@ theme_set(theme_bw())
 Import BAM file into R.
 
 ```{r}
-params
 csvfile = file.path(params$type)
 sample_table = read.csv(csvfile,row.names=1)
 file_names = paste0(sample_table$name,"_",params$virus,"_STAR.bam")
@@ -44,7 +46,7 @@ seqinfo(bamfiles[1])
 Define gene model. Downloaded gff files from fludb.org.
 
 ```{r}
-gff_file = "A_California_07_2009_GffResults.gff"
+gff_file = paste0(params$virus,"_GffResults.gff")
 txdb = makeTxDbFromGFF(gff_file,format = "gff3")
 ```
 
@@ -60,15 +62,24 @@ it match those in the BAM file. See ?renameSeqlevels, ?keepSeqlevels and ?seqlev
 seqlevels.
 
 ```{r}
-seqnames_mapping = c('832340' = 'gb:CY121687|Organism:Influenza',
-                     '832372' = "gb:CY121681|Organism:Influenza",
-                     '833612' = "gb:CY121682|Organism:Influenza",
-                     '835512' = "gb:CY121683|Organism:Influenza",
-                     '835525' = "gb:CY121680|Organism:Influenza",
-                     '839114' = "gb:CY121686|Organism:Influenza",
-                     '839546' = "gb:CY121684|Organism:Influenza",
-                     '856776' = "gb:CY121685|Organism:Influenza")
-ebg_renamed = renameSeqlevels(ebg, seqnames_mapping)
+seqnames_mapping = NULL
+seqnames_mapping$A_California_07_2009 = c('832340' = 'gb:CY121687|Organism:Influenza',
+                                          '832372' = "gb:CY121681|Organism:Influenza",
+                                          '833612' = "gb:CY121682|Organism:Influenza",
+                                          '835512' = "gb:CY121683|Organism:Influenza",
+                                          '835525' = "gb:CY121680|Organism:Influenza",
+                                          '839114' = "gb:CY121686|Organism:Influenza",
+                                          '839546' = "gb:CY121684|Organism:Influenza",
+                                          '856776' = "gb:CY121685|Organism:Influenza")
+seqnames_mapping$A_Victoria_361_2011 = c('1185941' = 'gb:KJ942683|Organism:Influenza',
+                                         '1185945' = 'gb:KJ942684|Organism:Influenza',
+                                         '1185959' = 'gb:KJ942680|Organism:Influenza',
+                                         '1185960' = 'gb:KJ942681|Organism:Influenza',
+                                         '1185990' = 'gb:KJ942682|Organism:Influenza',
+                                         '1185991' = 'gb:KJ942686|Organism:Influenza',
+                                         '1185992' = 'gb:KJ942687|Organism:Influenza',
+                                         '1186070' = 'gb:KJ942685|Organism:Influenza')
+ebg_renamed = renameSeqlevels(ebg, seqnames_mapping[[params$virus]])
 seqnames(ebg)
 seqnames(ebg_renamed)
 ```
@@ -92,7 +103,7 @@ counts
 Need to account for library size. We can access the size factors from our DESeq2 analysis on monocytes.
 
 ```{r}
-load("/Users/cseiler/Box Sync/Lisa/RNAseq/monocyte/tophat/publication_ready_workflow/dds.Rdata")
+load("dds.Rdata")
 counts_nonzero = counts[rowSums(counts) > 0,]
 counts_normalized = counts_nonzero/sizeFactors(dds)
 pheatmap(counts_normalized,
@@ -118,5 +129,5 @@ ggplot(count_sample_combo_long, aes(x=treatment, y=value, col=harvest, shape=don
 ## Session Info
 
 ```{r}
-sessionInfo()
+session_info()
 ```

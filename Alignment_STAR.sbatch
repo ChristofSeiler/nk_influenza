@@ -24,6 +24,6 @@ STAR \
 
 # copy BAM file to partent folder
 if [ -f STAR_out/Log.final.out ]; then
-    echo PREFIX=`basename $PWD`
-    echo cp STAR_out/Aligned.out.bam ../${PREFIX}_STAR.bam
+    PREFIX=`basename $PWD`
+    cp STAR_out/Aligned.out.bam ../${PREFIX}_STAR.bam
 fi
