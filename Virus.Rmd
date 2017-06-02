@@ -87,14 +87,18 @@ se_list
 Extract count matrix. Need to account for library size. We can access the size factors from our DESeq2 analysis on monocytes. Need to run this file in the same folder as the DESeq2 analysis. Facet by gene. Plot both for quality control.
 
 ```{r fig.height=7,fig.width=10}
-load("dds.Rdata")
-p_separate = lapply(1:2,function(i) {
-  se = se_list[[i]]
-  counts = assay(se)
+normalize_counts = function(counts) {
+  load("dds.Rdata")
   ids = sapply(colnames(counts),function(sample_name) which(sample_name == names(sizeFactors(dds))))
   counts = counts[,ids]
   counts_nonzero = counts[rowSums(counts) > 0,]
   counts_nonzero_normalized = counts_nonzero/sizeFactors(dds)
+  counts_nonzero_normalized
+}
+p_separate = lapply(1:2,function(i) {
+  se = se_list[[i]]
+  counts = assay(se)
+  counts_nonzero_normalized = normalize_counts(counts)
   combo = merge(t(counts_nonzero_normalized),colData(se),by="row.names")
   combo_long = melt(combo,
                     id.vars = c("Row.names","name","treatment","harvest","donor"))
