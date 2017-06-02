@@ -20,3 +20,9 @@ STAR \
 --readFilesCommand gunzip -c \
 --outSAMtype BAM Unsorted \
 --outFileNamePrefix ${VIRUS}_STAR_
+
+# copy BAM file to partent folder
+if [ -f ${VIRUS}_STAR_Log.final.out ]; then
+    PREFIX=`basename $PWD`
+    cp ${VIRUS}_STAR_Aligned.out.bam ../${PREFIX}_${VIRUS}_STAR.bam
+fi

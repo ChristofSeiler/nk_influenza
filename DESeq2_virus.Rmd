@@ -14,9 +14,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Goal
 
-Differential analysis of gene expression in influenza strains.
-
-## Workfow
+Count influenza strain gene expression in monocyte co-culture.
 
 Load packages.
 
@@ -24,16 +22,9 @@ Load packages.
 library(Rsamtools)
 library(GenomicFeatures)
 library(GenomicAlignments)
-library(DESeq2)
-
-library(pheatmap)
-library(RColorBrewer)
 library(ggplot2)
-library(org.Hs.eg.db)
-library(BiocParallel)
-n_cores = as.integer(Sys.getenv("SLURM_NTASKS"))
-n_cores
-register(MulticoreParam(workers = n_cores))
+library(reshape2)
+library(pheatmap)
 theme_set(theme_bw())
 strain_colors = NULL
 strain_colors$H1N1 = "#619CFF"
@@ -41,7 +32,7 @@ strain_colors$H3N2 = "#F8766D"
 strain_colors$UI = "#00BA38"
 ```
 
-### Prepare Count Matrix
+## Prepare Count Matrix
 
 Import BAM file into R.
 
@@ -49,12 +40,9 @@ Import BAM file into R.
 params
 csvfile = file.path(params$type)
 sample_table = read.csv(csvfile,row.names=1)
-file_names = paste0(sample_table$name,"_",params$mapping,".bam")
+file_names = paste0(sample_table$name,"_",params$virus,"_STAR.bam")
 bamfiles = BamFileList(file_names, yieldSize=2000000)
 seqinfo(bamfiles[1])
-
-bamfiles = BamFileList(file_names)
-
 ```
 
 Define gene model. Downloaded gff files from fludb.org.
@@ -67,7 +55,7 @@ txdb = makeTxDbFromGFF(gff_file,format = "gff3")
 List of all the exons grouped by gene.
 
 ```{r}
-ebg = exonsBy(txdb, by="tx")
+ebg = exonsBy(txdb, by="tx", use.names=TRUE)
 ebg
 ```
 
@@ -76,158 +64,63 @@ it match those in the BAM file. See ?renameSeqlevels, ?keepSeqlevels and ?seqlev
 seqlevels.
 
 ```{r}
-# TODO
+seqnames_mapping = c('832340' = 'gb:CY121687|Organism:Influenza',
+                     '832372' = "gb:CY121681|Organism:Influenza",
+                     '833612' = "gb:CY121682|Organism:Influenza",
+                     '835512' = "gb:CY121683|Organism:Influenza",
+                     '835525' = "gb:CY121680|Organism:Influenza",
+                     '839114' = "gb:CY121686|Organism:Influenza",
+                     '839546' = "gb:CY121684|Organism:Influenza",
+                     '856776' = "gb:CY121685|Organism:Influenza")
+ebg_renamed = renameSeqlevels(ebg, seqnames_mapping)
+seqnames(ebg)
+seqnames(ebg_renamed)
 ```
 
 Read counting step.
 
 ```{r}
-se = summarizeOverlaps(features=ebg, reads=bamfiles,
+se = summarizeOverlaps(features=ebg_renamed, reads=bamfiles,
                        mode="Union",
                        singleEnd=FALSE,
                        ignore.strand=TRUE,
-                       fragments=TRUE )
+                       fragments=TRUE)
 se
-dim(se)
-rowRanges(se)
-str(metadata(rowRanges(se)))
 colData(se) = DataFrame(sample_table)
-colData(se)
+counts = assay(se)
+counts
 ```
 
-This completes the counting step, we have counted the fragments which overlap the genes in the gene model we specified. Now we can feed this into many different kind of linear models in Bioconductor, one option is to use the ``DESeq2`` package.
+## Analyze Count Matrix
 
-### Differential Expression Analysis
-
-Change reference treatment to uninfected UI. Optimize the number of genes which will have an adjusted p value below a given FDR cutoff value ``alpha``.
+Need to account for library size. We can access the size factors from our DESeq2 analysis on monocytes.
 
 ```{r}
-dds = DESeqDataSet(se, design = ~ harvest + donor + treatment)
-dds = DESeq(dds)
-contrast = c("treatment",params$condition,params$baseline)
-res = results(dds, alpha=0.1, contrast=contrast)
+load("/Users/cseiler/Box Sync/Lisa/RNAseq/monocyte/tophat/publication_ready_workflow/dds.Rdata")
+counts_nonzero = counts[rowSums(counts) > 0,]
+counts_normalized = counts_nonzero/sizeFactors(dds)
+pheatmap(counts_normalized,
+         cluster_rows = FALSE,
+         cluster_cols = FALSE,
+         show_rownames = TRUE,
+         annotation_col = sample_table[,c("treatment","harvest","donor")])
 ```
 
-Some basics stats.
+Per gene plots.
 
 ```{r}
-summary(res)
+count_sample_combo = merge(t(counts_normalized),sample_table,by="row.names")
+count_sample_combo_long = melt(count_sample_combo,
+                               id.vars = c("Row.names","name","treatment","harvest","donor"))
+ggplot(count_sample_combo_long, aes(x=treatment, y=value, col=harvest, shape=donor)) +
+  geom_point(position=position_jitter(w=0.3,h=0), size=4) + 
+  scale_y_log10() +
+  facet_wrap(~variable,nrow = 2) +
+  ylab("size factor normalized log10 transformed counts")
 ```
 
-Count how many p-values were less than 0.1.
+## Session Info
 
 ```{r}
-sum(res$padj < 0.1, na.rm=TRUE)
-```
-
-Shows the log2 fold changes.
-
-```{r}
-plotMA(res, main="DESeq2", ylim=c(-2,2))
-pdf(file = paste0("MA_",paste0(contrast,collapse = "_"),"_",params$mapping,".pdf"),width = 5,height = 4)
-plotMA(res, main="DESeq2", ylim=c(-2,2))
-dev.off()
-```
-
-More infos about variables and tests.
-
-```{r}
-mcols(res)$description
-```
-
-Histogram of the p values. Exclude genes with only one count to avoid spikes.
-
-```{r}
-hist(res$pvalue[res$baseMean > 1], breaks=0:20/20, col="grey50", border="white")
-```
-
-Extracting transformed count values.
-
-```{r}
-rld = rlog(dds, blind=FALSE)
-head(assay(rld), 3)
-```
-
-Heatmap of all significant genes.
-
-```{r fig.asp=1,fig.height=7}
-select = which(res$padj < 0.1)
-df = as.data.frame(colData(dds)[,c("donor","harvest","treatment")])
-subset = assay(rld)[select,c( which(df$treatment==contrast[2]), 
-                              which(df$treatment==contrast[3]) )]
-pheatmap(subset, cluster_rows=TRUE, show_rownames=FALSE,
-         cluster_cols=FALSE, annotation_col=df)
-```
-
-Normalized counts plus a pseudocount of 0.5 are shown for one gene. To call ``plotCountsAnnotated`` outside of this Rmd file, you need to load the ``dds`` object and the packages ``DESeq2``, ``ggplot2`` and ``org.Hs.eg.db``.
-
-```{r}
-#load("dds.Rdata")
-#library(DESeq2)
-#library(ggplot2)
-#library(org.Hs.eg.db)
-plotCountsAnnotated =function(gene_symbol) {
-  e2s = toTable(org.Hs.egSYMBOL)
-  gene_id = e2s$gene_id[e2s$symbol==gene_symbol]
-  d = plotCounts(dds, gene=gene_id, intgroup=c("treatment","harvest","donor"),returnData=TRUE)
-  ggplot(d, aes(x=treatment, y=count, col=harvest, shape=donor)) +
-    geom_point(position=position_jitter(w=0.3,h=0), size=4) +
-    scale_y_log10() + 
-    ggtitle(gene_symbol)
-}
-plotCountsAnnotated("IFNB1")
-```
-
-### Data Quality Assessment
-
-Heatmap of top (highest mean count) 100 genes.
-
-```{r fig.asp=1,fig.height=7}
-select = order(rowMeans(counts(dds,normalized=TRUE)),decreasing=TRUE)[1:100]
-pheatmap(assay(rld)[select,], cluster_rows=FALSE, show_rownames=FALSE,
-         cluster_cols=FALSE, annotation_col=df)
-pheatmap(assay(rld)[select,], cluster_rows=TRUE, show_rownames=FALSE,
-         cluster_cols=FALSE, annotation_col=df)
-```
-
-Heatmap of the sample-to-sample distances.
-
-```{r fig.asp=1}
-sampleDists <- dist(t(assay(rld)))
-sampleDistMatrix <- as.matrix(sampleDists)
-colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
-pheatmap(sampleDistMatrix,
-         clustering_distance_rows=sampleDists,
-         clustering_distance_cols=sampleDists,
-         col=colors)
-```
-
-Principal component plot of the samples.
-
-```{r}
-data = plotPCA(rld, intgroup=c("treatment","harvest"), returnData=TRUE)
-percentVar = round(100 * attr(data, "percentVar"))
-ind = which(names(strain_colors) %in% levels(data[,"treatment"]))
-strain_colors_sel = unlist(strain_colors[ind])
-ggobj = ggplot(data, aes(PC1, PC2, color=treatment, shape=harvest)) +
-  geom_point(size=3) +
-  xlab(paste0("PC1: ",percentVar[1],"% variance")) +
-  ylab(paste0("PC2: ",percentVar[2],"% variance")) +
-  coord_fixed() + 
-  scale_color_manual(values=strain_colors_sel)
-ggobj
-ggsave(ggobj,filename = paste0("PCA_treatment_harvest_",paste0(contrast,collapse = "_"),"_",params$mapping,".pdf"),
-       width = 5,height = 3)
-ggobj = plotPCA(rld, intgroup=c("donor"))
-ggobj
-ggsave(ggobj,filename = paste0("PCA_group_",paste0(contrast,collapse = "_"),"_",params$mapping,".pdf"),
-       width = 5,height = 3)
-```
-
-### Export Results
-
-```{r}
-save(se,file = "se.Rdata")
-save(dds,file = "dds.Rdata")
-write.csv(as.data.frame(res),file = params$gene_list)
+sessionInfo()
 ```
