@@ -115,7 +115,7 @@ pheatmap(counts_normalized,
 
 Per gene plots.
 
-```{r}
+```{r fig.height=7,fig.width=10}
 count_sample_combo = merge(t(counts_normalized),sample_table,by="row.names")
 count_sample_combo_long = melt(count_sample_combo,
                                id.vars = c("Row.names","name","treatment","harvest","donor"))
