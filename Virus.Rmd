@@ -5,7 +5,6 @@ author: Christof Seiler
 date: June, 2017
 params:
   type: "sample_table_monocyte_all.csv"
-  virus: "A_Victoria_361_2011"
 ---
 
 ```{r setup, include=FALSE}
@@ -19,51 +18,26 @@ Count influenza strain gene expression in monocyte co-culture. The two strains a
 * A_California_07_2009
 * A_Victoria_361_2011
 
-```{r message=FALSE}
+```{r}
 library(Rsamtools)
 library(GenomicFeatures)
 library(GenomicAlignments)
 library(ggplot2)
 library(reshape2)
+library(stringr)
 library(devtools)
-library(pheatmap)
 theme_set(theme_bw())
 params
+virus_names = c("A_California_07_2009","A_Victoria_361_2011")
 ```
 
 ## Prepare Count Matrix
 
-Import BAM file into R.
-
-```{r}
-csvfile = file.path(params$type)
-sample_table = read.csv(csvfile,row.names=1)
-file_names = paste0(sample_table$name,"_",params$virus,"_STAR.bam")
-bamfiles = BamFileList(file_names, yieldSize=2000000)
-seqinfo(bamfiles[1])
-```
-
-Define gene model. Downloaded gff files from fludb.org.
-
-```{r}
-gff_file = paste0(params$virus,"_GffResults.gff")
-txdb = makeTxDbFromGFF(gff_file,format = "gff3")
-```
-
-List of all the exons grouped by gene.
-
-```{r}
-ebg = exonsBy(txdb, by="tx", use.names=TRUE)
-ebg
-```
-
-Note that before passing txbygn to summarizeOverlaps, you should confirm that the seqlevels (chromosome names) in
-it match those in the BAM file. See ?renameSeqlevels, ?keepSeqlevels and ?seqlevels for examples of renaming
-seqlevels.
+Manually rename sequence levels because there is a mismatch between .fasta and .gff files download from [fludb.org](fludb.org).
 
 ```{r}
 seqnames_mapping = NULL
-seqnames_mapping$A_California_07_2009 = c('832340' = 'gb:CY121687|Organism:Influenza',
+seqnames_mapping[[virus_names[1]]] = c('832340' = 'gb:CY121687|Organism:Influenza',
                                           '832372' = "gb:CY121681|Organism:Influenza",
                                           '833612' = "gb:CY121682|Organism:Influenza",
                                           '835512' = "gb:CY121683|Organism:Influenza",
@@ -71,7 +45,7 @@ seqnames_mapping$A_California_07_2009 = c('832340' = 'gb:CY121687|Organism:Influ
                                           '839114' = "gb:CY121686|Organism:Influenza",
                                           '839546' = "gb:CY121684|Organism:Influenza",
                                           '856776' = "gb:CY121685|Organism:Influenza")
-seqnames_mapping$A_Victoria_361_2011 = c('1185941' = 'gb:KJ942683|Organism:Influenza',
+seqnames_mapping[[virus_names[2]]] = c('1185941' = 'gb:KJ942683|Organism:Influenza',
                                          '1185945' = 'gb:KJ942684|Organism:Influenza',
                                          '1185959' = 'gb:KJ942680|Organism:Influenza',
                                          '1185960' = 'gb:KJ942681|Organism:Influenza',
@@ -79,51 +53,65 @@ seqnames_mapping$A_Victoria_361_2011 = c('1185941' = 'gb:KJ942683|Organism:Influ
                                          '1185991' = 'gb:KJ942686|Organism:Influenza',
                                          '1185992' = 'gb:KJ942687|Organism:Influenza',
                                          '1186070' = 'gb:KJ942685|Organism:Influenza')
-ebg_renamed = renameSeqlevels(ebg, seqnames_mapping[[params$virus]])
-seqnames(ebg)
-seqnames(ebg_renamed)
 ```
 
-Read counting step.
+Import BAM file into R. Define gene model with downloaded .gff files. Rename. Count.
 
 ```{r}
-se = summarizeOverlaps(features=ebg_renamed, reads=bamfiles,
-                       mode="Union",
-                       singleEnd=FALSE,
-                       ignore.strand=TRUE,
-                       fragments=TRUE)
-se
-colData(se) = DataFrame(sample_table)
-counts = assay(se)
-counts
+make_count_matrix = function(virus) {
+  csvfile = file.path(params$type)
+  sample_table = read.csv(csvfile,row.names=1)
+  file_names = paste0(sample_table$name,"_",virus,"_STAR.bam")
+  bamfiles = BamFileList(file_names, yieldSize=2000000)
+  #seqinfo(bamfiles[1])
+  gff_file = paste0(virus,"_GffResults.gff")
+  txdb = makeTxDbFromGFF(gff_file,format = "gff3")
+  ebg = exonsBy(txdb, by="tx", use.names=TRUE)
+  ebg_renamed = renameSeqlevels(ebg, seqnames_mapping[[virus]])
+  #seqnames(ebg)
+  #seqnames(ebg_renamed)
+  se = summarizeOverlaps(features=ebg_renamed, reads=bamfiles,
+                         mode="Union",
+                         singleEnd=FALSE,
+                         ignore.strand=TRUE,
+                         fragments=TRUE)
+  colData(se) = DataFrame(sample_table)
+  se
+}
+se_list = lapply(virus_names,make_count_matrix)
+se_list
 ```
 
 ## Analyze Count Matrix
 
-Need to account for library size. We can access the size factors from our DESeq2 analysis on monocytes.
-
-```{r}
-load("dds.Rdata")
-counts_nonzero = counts[rowSums(counts) > 0,]
-counts_normalized = counts_nonzero/sizeFactors(dds)
-pheatmap(counts_normalized,
-         cluster_rows = FALSE,
-         cluster_cols = FALSE,
-         show_rownames = TRUE,
-         annotation_col = sample_table[,c("treatment","harvest","donor")])
-```
-
-Per gene plots.
+Extract count matrix. Need to account for library size. We can access the size factors from our DESeq2 analysis on monocytes. Need to run this file in the same folder as the DESeq2 analysis. Facet by gene. Plot both for quality control.
 
 ```{r fig.height=7,fig.width=10}
-count_sample_combo = merge(t(counts_normalized),sample_table,by="row.names")
-count_sample_combo_long = melt(count_sample_combo,
-                               id.vars = c("Row.names","name","treatment","harvest","donor"))
-ggplot(count_sample_combo_long, aes(x=treatment, y=value, col=harvest, shape=donor)) +
-  geom_point(position=position_jitter(w=0.3,h=0), size=3) + 
-  scale_y_log10() +
-  facet_wrap(~variable,nrow = 2) +
-  ylab("size factor normalized log10 transformed counts")
+load("dds.Rdata")
+p_separate = lapply(1:2,function(i) {
+  se = se_list[[i]]
+  counts = assay(se)
+  ids = sapply(colnames(counts),function(sample_name) which(sample_name == names(sizeFactors(dds))))
+  counts = counts[,ids]
+  counts_nonzero = counts[rowSums(counts) > 0,]
+  counts_nonzero_normalized = counts_nonzero/sizeFactors(dds)
+  combo = merge(t(counts_nonzero_normalized),colData(se),by="row.names")
+  combo_long = melt(combo,
+                    id.vars = c("Row.names","name","treatment","harvest","donor"))
+  ggplot(combo_long, aes(x=treatment, y=value, col=harvest, shape=donor)) +
+    geom_point(position=position_jitter(w=0.3,h=0), size=3) + 
+    scale_y_log10() +
+    facet_wrap(~variable,nrow = 2) +
+    ylab("size factor normalized log10 transformed counts") +
+    ggtitle(str_replace_all(string = virus_names[i],pattern = "_",replacement = "/"))
+})
+p_separate
+```
+
+Compare the two strains.
+
+```{r fig.height=7,fig.width=10}
+# TODO
 ```
 
 ## Session Info
