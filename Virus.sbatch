@@ -9,8 +9,4 @@
 
 module load R/3.3.0
 
-virus=A_California_07_2009
-R -e "rmarkdown::render('Virus.Rmd',output_file = 'Virus_${virus}.html',params = list(virus = '${virus}'))"
-
-virus=A_Victoria_361_2011
-R -e "rmarkdown::render('Virus.Rmd',output_file = 'Virus_${virus}.html',params = list(virus = '${virus}'))"
+R -e "rmarkdown::render('Virus.Rmd')"

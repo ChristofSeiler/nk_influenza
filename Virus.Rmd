@@ -97,25 +97,47 @@ normalize_counts = function(counts) {
 }
 p_separate = lapply(1:2,function(i) {
   se = se_list[[i]]
-  counts = assay(se)
-  counts_nonzero_normalized = normalize_counts(counts)
+  counts_nonzero_normalized = normalize_counts(assay(se))
   combo = merge(t(counts_nonzero_normalized),colData(se),by="row.names")
   combo_long = melt(combo,
                     id.vars = c("Row.names","name","treatment","harvest","donor"))
+  combo_long$variable = factor(combo_long$variable, 
+                               levels = sort(levels(combo_long$variable)))
   ggplot(combo_long, aes(x=treatment, y=value, col=harvest, shape=donor)) +
     geom_point(position=position_jitter(w=0.3,h=0), size=3) + 
     scale_y_log10() +
     facet_wrap(~variable,nrow = 2) +
-    ylab("size factor normalized log10 transformed counts") +
+    ylab("normalized and log10 transformed counts") +
     ggtitle(str_replace_all(string = virus_names[i],pattern = "_",replacement = "/"))
 })
 p_separate
+ggsave(p_separate[[1]],filename = paste0("Virus_Expression_",virus_names[1],".pdf"),height = 5,width = 9)
+ggsave(p_separate[[2]],filename = paste0("Virus_Expression_",virus_names[2],".pdf"),height = 5,width = 9)
 ```
 
 Compare the two strains.
 
 ```{r fig.height=7,fig.width=10}
-# TODO
+combo = lapply(1:2,function(i) {
+  se = se_list[[i]]
+  counts_nonzero_normalized = normalize_counts(assay(se))
+  combo = merge(t(counts_nonzero_normalized),colData(se),by="row.names")
+  combo$strain = virus_names[i]
+  combo
+}) %>% do.call(rbind,.)
+combo_subset = rbind(subset(combo,treatment == "H1N1" & strain == "A_California_07_2009"),
+                     subset(combo,treatment == "H3N2" & strain == "A_Victoria_361_2011"))
+combo_subset_long = melt(combo_subset,
+                         id.vars = c("Row.names","name","treatment","harvest","donor","strain"))
+combo_subset_long$variable = factor(combo_subset_long$variable, 
+                                    levels = sort(levels(combo_subset_long$variable)))
+p_compare = ggplot(combo_subset_long, aes(x=treatment, y=value, col=harvest, shape=donor)) +
+  geom_point(position=position_jitter(w=0.3,h=0), size=3) + 
+  scale_y_log10() +
+  facet_wrap(~variable,nrow = 2) +
+  ylab("normalized and log10 transformed counts")
+p_compare
+ggsave(p_compare,filename = "Virus_Expression_Comparison.pdf",height = 4,width = 9)
 ```
 
 ## Session Info
