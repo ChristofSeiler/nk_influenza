@@ -27,6 +27,10 @@ library(reshape2)
 library(stringr)
 library(devtools)
 theme_set(theme_bw())
+strain_colors = NULL
+strain_colors$H1N1 = "#619CFF"
+strain_colors$H3N2 = "#F8766D"
+strain_colors$UI = "#00BA38"
 params
 virus_names = c("A_California_07_2009","A_Victoria_361_2011")
 ```
@@ -38,21 +42,21 @@ Manually rename sequence levels because there is a mismatch between .fasta and .
 ```{r}
 seqnames_mapping = NULL
 seqnames_mapping[[virus_names[1]]] = c('832340' = 'gb:CY121687|Organism:Influenza',
-                                          '832372' = "gb:CY121681|Organism:Influenza",
-                                          '833612' = "gb:CY121682|Organism:Influenza",
-                                          '835512' = "gb:CY121683|Organism:Influenza",
-                                          '835525' = "gb:CY121680|Organism:Influenza",
-                                          '839114' = "gb:CY121686|Organism:Influenza",
-                                          '839546' = "gb:CY121684|Organism:Influenza",
-                                          '856776' = "gb:CY121685|Organism:Influenza")
+                                       '832372' = "gb:CY121681|Organism:Influenza",
+                                       '833612' = "gb:CY121682|Organism:Influenza",
+                                       '835512' = "gb:CY121683|Organism:Influenza",
+                                       '835525' = "gb:CY121680|Organism:Influenza",
+                                       '839114' = "gb:CY121686|Organism:Influenza",
+                                       '839546' = "gb:CY121684|Organism:Influenza",
+                                       '856776' = "gb:CY121685|Organism:Influenza")
 seqnames_mapping[[virus_names[2]]] = c('1185941' = 'gb:KJ942683|Organism:Influenza',
-                                         '1185945' = 'gb:KJ942684|Organism:Influenza',
-                                         '1185959' = 'gb:KJ942680|Organism:Influenza',
-                                         '1185960' = 'gb:KJ942681|Organism:Influenza',
-                                         '1185990' = 'gb:KJ942682|Organism:Influenza',
-                                         '1185991' = 'gb:KJ942686|Organism:Influenza',
-                                         '1185992' = 'gb:KJ942687|Organism:Influenza',
-                                         '1186070' = 'gb:KJ942685|Organism:Influenza')
+                                       '1185945' = 'gb:KJ942684|Organism:Influenza',
+                                       '1185959' = 'gb:KJ942680|Organism:Influenza',
+                                       '1185960' = 'gb:KJ942681|Organism:Influenza',
+                                       '1185990' = 'gb:KJ942682|Organism:Influenza',
+                                       '1185991' = 'gb:KJ942686|Organism:Influenza',
+                                       '1185992' = 'gb:KJ942687|Organism:Influenza',
+                                       '1186070' = 'gb:KJ942685|Organism:Influenza')
 ```
 
 Import BAM file into R. Define gene model with downloaded .gff files. Rename. Count.
@@ -103,12 +107,17 @@ p_separate = lapply(1:2,function(i) {
                     id.vars = c("Row.names","name","treatment","harvest","donor"))
   combo_long$variable = factor(combo_long$variable, 
                                levels = sort(levels(combo_long$variable)))
-  ggplot(combo_long, aes(x=treatment, y=value, col=harvest, shape=donor)) +
+  combo_long$harvest = factor(combo_long$harvest, 
+                              levels = c("7HPI","24HPI"))
+  ind = which(names(strain_colors) %in% levels(combo_long$treatment))
+  strain_colors_sel = unlist(strain_colors[ind])
+  ggplot(combo_long, aes(x=harvest, y=value, color = treatment, shape=donor)) +
     geom_point(position=position_jitter(w=0.3,h=0), size=3) + 
     scale_y_log10() +
     facet_wrap(~variable,nrow = 2) +
     ylab("normalized and log10 transformed counts") +
-    ggtitle(str_replace_all(string = virus_names[i],pattern = "_",replacement = "/"))
+    ggtitle(str_replace_all(string = virus_names[i],pattern = "_",replacement = "/")) +
+    scale_color_manual(values=strain_colors_sel)
 })
 p_separate
 ggsave(p_separate[[1]],filename = paste0("Virus_Expression_",virus_names[1],".pdf"),height = 5,width = 9)
@@ -131,11 +140,16 @@ combo_subset_long = melt(combo_subset,
                          id.vars = c("Row.names","name","treatment","harvest","donor","strain"))
 combo_subset_long$variable = factor(combo_subset_long$variable, 
                                     levels = sort(levels(combo_subset_long$variable)))
-p_compare = ggplot(combo_subset_long, aes(x=treatment, y=value, col=harvest, shape=donor)) +
+combo_subset_long$harvest = factor(combo_subset_long$harvest, 
+                                   levels = c("7HPI","24HPI"))
+ind = which(names(strain_colors) %in% levels(combo_subset_long$treatment))
+strain_colors_sel = unlist(strain_colors[ind])
+p_compare = ggplot(combo_subset_long, aes(x=harvest, y=value, col=treatment, shape=donor)) +
   geom_point(position=position_jitter(w=0.3,h=0), size=3) + 
   scale_y_log10() +
   facet_wrap(~variable,nrow = 2) +
-  ylab("normalized and log10 transformed counts")
+  ylab("normalized and log10 transformed counts") +
+  scale_color_manual(values=strain_colors_sel)
 p_compare
 ggsave(p_compare,filename = "Virus_Expression_Comparison.pdf",height = 4,width = 9)
 ```
