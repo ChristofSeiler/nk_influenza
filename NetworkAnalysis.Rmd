@@ -46,6 +46,7 @@ library("tibble")
 library("dplyr")
 library("ggplot2")
 n_cores = as.integer(Sys.getenv("SLURM_NTASKS"))
+if(is.na(n_cores)) n_cores = 4
 n_cores
 ```
 
