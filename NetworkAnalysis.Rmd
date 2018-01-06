@@ -4,8 +4,8 @@ author: Christof Seiler
 date: October, 2016
 output: html_document
 params:
-  fdr: 0.1
-  num_nodes: 200
+  fdr: 0.01
+  num_nodes: 25
   gene_list: "treatment_H1N1_H3N2_tophat_results.csv"
 ---
 
@@ -19,27 +19,32 @@ This Rmd file contains a minimal network analysis pipeline using the packages ``
 
 Install necessary packages from bioconductor repository. Run this code only once to install packages.
 
-```{r eval=FALSE}
-source("https://bioconductor.org/biocLite.R")
-biocLite("STRINGdb")
-biocLite("BioNet")
-biocLite("DLBCL")
-biocLite("org.Hs.eg.db")
-biocLite("KEGGREST")
-install.packages(c("stringr","igraph","visNetwork"))
+```{r install_packages, warning=FALSE, message=FALSE, eval=TRUE}
+pkgs_needed = c("STRINGdb","BioNet","DLBCL","org.Hs.eg.db","KEGGREST",
+                "stringr","igraph","visNetwork","magrittr","tibble",
+                "dplyr","ggplot2")
+letsinstall = setdiff(pkgs_needed, installed.packages()) 
+if (length(letsinstall) > 0) {
+  source("http://bioconductor.org/biocLite.R")
+  biocLite(letsinstall)
+}
 ```
 
 Load packages.
 
 ```{r warning=FALSE,message=FALSE}
-library(STRINGdb)
-library(BioNet)
-library(DLBCL)
-library(org.Hs.eg.db)
-library(KEGGREST)
-library(stringr)
-library(igraph)
-library(visNetwork)
+library("STRINGdb")
+library("BioNet")
+library("DLBCL")
+library("org.Hs.eg.db")
+library("KEGGREST")
+library("stringr")
+library("igraph")
+library("visNetwork")
+library("magrittr")
+library("tibble")
+library("dplyr")
+library("ggplot2")
 n_cores = as.integer(Sys.getenv("SLURM_NTASKS"))
 n_cores
 ```
@@ -208,13 +213,34 @@ list_chunk_pathways = lapply(chunks_pathways,function(one_chunk_pathways) {
 # flatten list of lists
 all_pathways = unlist(list_chunk_pathways, recursive=FALSE)
 # check for all human pathways
-gene_overlap = t(sapply(all_pathways,function(pathway) {
-  genes_one_pathway = pathway$GENE[c(TRUE, FALSE)]
-  list(name=pathway$NAME,
-       overlap=mean(genes_one_pathway %in% gene_table$X))
-  }))
-ordered_ids = order(unlist(gene_overlap[,"overlap"]),decreasing = TRUE)
-head(gene_overlap[ordered_ids,],10)
+tb_pways = lapply(all_pathways,function(pway) {
+  gene_ids = pway$GENE[c(TRUE,FALSE)]
+  tibble(
+    name = pway$NAME,
+    overlap = mean(gene_ids %in% gene_table$X)
+    )
+}) %>% bind_rows
+```
+
+Only keep pathways that overlap at least 5% of genes.
+
+```{r}
+tb_pways %<>% 
+  dplyr::filter(overlap > 0.05) %>% 
+  dplyr::arrange(desc(overlap))
+tb_pways$name %<>% str_replace(" - Homo sapiens \\(human\\)","")
+tb_pways
+```
+
+Visualize pathway overlap.
+
+```{r pathways_plot}
+ggplot(tb_pways,aes(x = 100*overlap,y = name,color = name)) + 
+  geom_point(size = 2) +
+  theme(legend.position="none") +
+  xlab("Overlap in %") +
+  ylab("Pathway Name")
+ggsave("pathway_overlap.pdf",width = 5,height = 3)
 ```
 
 ## Export Results
