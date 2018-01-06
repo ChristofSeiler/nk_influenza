@@ -235,6 +235,7 @@ tb_pways
 Visualize pathway overlap.
 
 ```{r pathways_plot}
+tb_pways$name %<>% factor(levels = rev(tb_pways$name))
 ggplot(tb_pways,aes(x = 100*overlap,y = name,color = name)) + 
   geom_point(size = 2) +
   theme(legend.position="none") +
