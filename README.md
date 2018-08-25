@@ -1,4 +1,4 @@
-# Code to Reproduce Results
+# NK Cell Response to Influenza A Viruses
 
 This is the code repository to reproduce all major figures in our manuscript:
 
