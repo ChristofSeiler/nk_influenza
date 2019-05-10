@@ -1,0 +1,67 @@
+---
+title: "Look Up Nucleotide Sequence"
+author:
+- name: Christof Seiler
+  affiliation: Maastricht University
+output:
+  BiocStyle::html_document
+vignette: |
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+# Prerequisites
+
+Install R packages.
+
+```{r install_load_pkgs, eval=FALSE}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("BSgenome.Hsapiens.UCSC.hg38")
+BiocManager::install("TxDb.Hsapiens.UCSC.hg38.knownGene")
+```
+
+Load R packages.
+
+```{r load_pkgs, warning=FALSE, message=FALSE}
+library("TxDb.Hsapiens.UCSC.hg38.knownGene")
+library("BSgenome.Hsapiens.UCSC.hg38")
+library("readr")
+library("magrittr")
+```
+
+# Lookup Nucleotide Sequence
+
+Obtained gene id from [genecards.org](https://www.genecards.org/cgi-bin/carddisp.pl?gene=NCR1). The code is copied from [GenomicRanges vignettes](http://bioconductor.org/packages/devel/bioc/vignettes/GenomicRanges/inst/doc/GenomicRangesHOWTOs.pdf), page 18, "2.13 How to get the exon and intron sequences of a given gene".
+
+```{r lookup}
+genome = BSgenome.Hsapiens.UCSC.hg38
+txdb = TxDb.Hsapiens.UCSC.hg38.knownGene
+ncr1 = "9437" # Entrez gene id for NCR1
+ncr1_txs = transcriptsBy(txdb, by="gene")[[ncr1]]
+ncr1_txs
+ncr1_tx_names = mcols(ncr1_txs)$tx_name
+ncr1_tx_names
+ncr1_exbytx = exonsBy(txdb, "tx", use.names=TRUE)[ncr1_tx_names]
+elementNROWS(ncr1_exbytx)
+ncr1_ex_seqs = getSeq(genome, ncr1_exbytx)
+ncr1_ex_seqs
+```
+
+Collapse `DNAStringSetList` to a string.
+
+```{r}
+clist = CharacterList(ncr1_ex_seqs)
+ncr1_exon_regions = lapply(clist, function(x) paste(unlist(x), collapse = ""))
+ncr1_sequence = paste(ncr1_exon_regions, collapse = "")
+nchar(ncr1_sequence)
+ncr1_sequence
+write_file(ncr1_sequence, path = "ncr1_sequence.txt")
+```
+
+# Session Info {.unnumbered}
+
+```{r sessionInfo, echo=FALSE}
+sessionInfo()
+```
